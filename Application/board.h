@@ -8,83 +8,99 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-/*********************ADC***********************/
-#define ADC_FEEDBACK_HANDLE     ADC1
-#define ADC_FEEDBACK_IRQ        ADC1_IRQn
+/**************CURRENT MONITOR*****************/
+#define ADC_I_SENSE_HANDLE      ADC1
+#define ADC_I_SENSE_CHANNEL     LL_ADC_CHANNEL_2
+#define ADC_I_SENSE_IRQ         ADC1_IRQn
 
-#define ADC_CHANNEL_COUNT       2
-#define ADC_300V_CHANNEL        LL_ADC_CHANNEL_3
-#define ADC_50V_CHANNEL         LL_ADC_CHANNEL_4
+#define OCP_ALERT_PORT          GPIOC
+#define OCP_ALERT_PIN           LL_GPIO_PIN_13
+
+#define I_SENSE_RESET_PORT      GPIOC
+#define I_SENSE_RESET_PIN       LL_GPIO_PIN_14
 /***********************************************/
 
-/*********************FLYBACK*******************/
-#define FLYBACK_SW1_HANDLE      TIM17
-#define FLYBACK_SW1_CHANNEL     LL_TIM_CHANNEL_CH1
+/*********************H BRIDGE******************/
+#define H_BRIDGE_SD1_HANDLE     TIM14
+#define H_BRIDGE_SD1_CHANNEL    LL_TIM_CHANNEL_CH1
 
-#define FLYBACK_SD1_PORT        GPIOC
-#define FLYBACK_SD1_PIN         LL_GPIO_PIN_13
+#define H_BRIDGE_HIN1_PORT      GPIOA
+#define H_BRIDGE_HIN1_PIN       LL_GPIO_PIN_6
 
-#define FLYBACK_SW2_HANDLE      TIM3
-#define FLYBACK_SW2_CHANNEL     LL_TIM_CHANNEL_CH2
+#define H_BRIDGE_SD2_HANDLE     TIM15
+#define H_BRIDGE_SD2_CHANNEL    LL_TIM_CHANNEL_CH2
 
-#define FLYBACK_SD2_PORT        GPIOA
-#define FLYBACK_SD2_PIN         LL_GPIO_PIN_10
+#define H_BRIDGE_HIN2_PORT      GPIOA
+#define H_BRIDGE_HIN2_PIN       LL_GPIO_PIN_5
 /***********************************************/
 
-/*******************DISCHARGE*******************/
-#define CAP_DISCHARGE1_HANDLE   TIM16
-#define CAP_DISCHARGE1_CHANNEL  LL_TIM_CHANNEL_CH1
+/*********************CHARGE PUMP***************/
+#define C_PUMP_LIN1_HANDLE      TIM3
+#define C_PUMP_LIN1_CHANNEL     LL_TIM_CHANNEL_CH2
 
-#define CAP_DISCHARGE2_HANDEL   TIM1
-#define CAP_DISCHARGE2_CHANNEL  LL_TIM_CHANNEL_CH2
+#define C_PUMP_HIN1_PORT        GPIOB
+#define C_PUMP_HIN1_PIN         LL_GPIO_PIN_0
+
+#define C_PUMP_LIN2_HANDLE      TIM16
+#define C_PUMP_LIN2_CHANNEL     LL_TIM_CHANNEL_CH1
+
+#define C_PUMP_HIN2_PORT        GPIOB
+#define C_PUMP_HIN2_PIN         LL_GPIO_PIN_9
 /***********************************************/
 
-/*********************OVP***********************/
-#define OVP_300_PORT            GPIOB
-#define OVP_300_PIN             LL_GPIO_PIN_2
-
-#define OVP_50_PORT             GPIOB
-#define OVP_50_PIN              LL_GPIO_PIN_1
+/***********************RELAY*******************/
+#define RELAY_SW_PORT           GPIOB
+#define RELAY_SW_PIN            LL_GPIO_PIN_1
 /***********************************************/
 
 /*********************UART**********************/
-#define RS232_UART_HANDLE       USART4
+#define RS232_UART_HANDLE       USART3
 #define RS232_UART_IRQ          USART3_6_IRQn
 
-#define RF_UART_HANDLE          USART1
-#define RF_UART_IRQ             USART1_IRQn
-
-#define H_BRIDGE_UART_HANDLE    USART3
-#define H_BRIDGE_UART_IRQ       USART3_6_IRQn
+#define GPP_UART_HANDLE         USART1
+#define GPP_UART_IRQ            USART1_IRQn
 /***********************************************/
 
 /**********************SPI**********************/
-#define FRAM_SPI_HANDLE         SPI1
+#define DAC_SPI_HANDLE          SPI1
 
-#define FRAM_SPI_CS_PORT        GPIOB
-#define FRAM_SPI_CS_PIN         LL_GPIO_PIN_0
+#define DAC_SPI_CS_PORT         GPIOA
+#define DAC_SPI_CS_PIN          LL_GPIO_PIN_15
+/***********************************************/
+
+/**********************I2C**********************/
+#define I2C_HANDLE              I2C2
 /***********************************************/
 
 /*******************DEBUG LED*******************/
-#define DEBUG_LED_PORT          GPIOA
-#define DEBUG_LED_PIN           LL_GPIO_PIN_2
+#define DEBUG_LED_PORT          GPIOB
+#define DEBUG_LED_PIN           LL_GPIO_PIN_12
 /***********************************************/
 
-/*******************DEBUG GPIO******************/
-#define DEBUG_GPIO1_PORT        GPIOA
-#define DEBUG_GPIO1_PIN         LL_GPIO_PIN_11
+/********************DECODER********************/
+#define DECOD_LS0_PORT          GPIOA
+#define DECOD_LS0_PIN           LL_GPIO_PIN_9
 
-#define DEBUG_GPIO2_PORT        GPIOA
-#define DEBUG_GPIO2_PIN         LL_GPIO_PIN_12
+#define DECOD_LS0_PORT          GPIOA
+#define DECOD_LS0_PIN           LL_GPIO_PIN_10
 
-#define DEBUG_GPIO3_PORT        GPIOB
-#define DEBUG_GPIO3_PIN         LL_GPIO_PIN_13
+#define DECOD_LS0_PORT          GPIOA
+#define DECOD_LS0_PIN           LL_GPIO_PIN_11
 
-#define DEBUG_GPIO4_PORT        GPIOB
-#define DEBUG_GPIO4_PIN         LL_GPIO_PIN_14
+#define DECOD_LS_EN_PORT        GPIOA
+#define DECOD_LS_EN_PIN         LL_GPIO_PIN_12
 
-#define DEBUG_GPIO5_PORT        GPIOB
-#define DEBUG_GPIO5_PIN         LL_GPIO_PIN_15
+#define DECOD_HS0_PORT          GPIOA
+#define DECOD_HS0_PIN           LL_GPIO_PIN_1
+
+#define DECOD_HS1_PORT          GPIOA
+#define DECOD_HS1_PIN           LL_GPIO_PIN_0
+
+#define DECOD_HS2_PORT          GPIOB
+#define DECOD_HS2_PIN           LL_GPIO_PIN_15
+
+#define DECOD_HS_EN_PORT        GPIOA
+#define DECOD_HS_EN_PIN         LL_GPIO_PIN_8
 /***********************************************/
 
 #endif /* BOARD_H_ */
