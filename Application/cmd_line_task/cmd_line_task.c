@@ -172,7 +172,7 @@ void CMD_Line_Task(void*)
                 return_value = CmdLineProcess(&CMD_line.p_buffer[CMD_line.read_index]);
                 CMD_line.read_index = CMD_line.write_index;
 
-                UART_Write(&RS232_UART, "> ", 3);
+                UART_Write(&RS232_UART, "> ", 2);
                 UART_Printf(&RS232_UART, ErrorCode[return_value]);
                 UART_Write(&RS232_UART, "> ", 2);
             }
