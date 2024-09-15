@@ -84,11 +84,11 @@
 #define DECOD_LS0_PORT          GPIOA
 #define DECOD_LS0_PIN           LL_GPIO_PIN_9
 
-#define DECOD_LS0_PORT          GPIOA
-#define DECOD_LS0_PIN           LL_GPIO_PIN_10
+#define DECOD_LS1_PORT          GPIOA
+#define DECOD_LS1_PIN           LL_GPIO_PIN_10
 
-#define DECOD_LS0_PORT          GPIOA
-#define DECOD_LS0_PIN           LL_GPIO_PIN_11
+#define DECOD_LS2_PORT          GPIOA
+#define DECOD_LS2_PIN           LL_GPIO_PIN_11
 
 #define DECOD_LS_EN_PORT        GPIOA
 #define DECOD_LS_EN_PIN         LL_GPIO_PIN_12
