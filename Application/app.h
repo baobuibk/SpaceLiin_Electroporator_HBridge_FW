@@ -19,7 +19,5 @@
 #include "uart.h"
 
 void App_Main(void);
-void H_BRIDGE_TX_IRQHandler(void);
-void H_BRIDGE_RX_IRQHandler(void);
 
 #endif /* APP_H_ */

@@ -4,7 +4,8 @@
 /.settings/
 
 # Ignore build artifacts and binaries
-/Debug/
+/Debug/*
+!Debug/GP_Controller.bin
 /Release/
 /build/
 /out/

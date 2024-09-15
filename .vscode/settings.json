@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "adc_task.h": "c"
+        "adc_task.h": "c",
+        "stm32f0xx_ll_gpio.h": "c",
+        "cmd_line.h": "c",
+        "cmd_line_task.h": "c",
+        "app.h": "c"
     }
 }
