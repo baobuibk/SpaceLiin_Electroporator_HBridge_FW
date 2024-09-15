@@ -155,8 +155,9 @@ void CMD_Line_Task_Init()
 void CMD_Line_Task(void*)
 {
     uint8_t return_value;
+    uint8_t time_out = 50;
 
-    if((!RX_BUFFER_EMPTY(&RS232_UART)) && (!CMD_BUFFER_FULL(&CMD_line)))
+    while((!RX_BUFFER_EMPTY(&RS232_UART)) && (time_out != 0))
     {
         CMD_line.RX_char = UART_Get_Char(&RS232_UART);
         UART_Write(&RS232_UART, &CMD_line.RX_char, 1);
@@ -190,7 +191,13 @@ void CMD_Line_Task(void*)
         {
             CMD_line.p_buffer[CMD_line.write_index] = CMD_line.RX_char;
             ADVANCE_CMD_WRITE_INDEX(&CMD_line);
+
+            if (CMD_BUFFER_FULL(&CMD_line))
+            {
+                CMD_line.read_index = CMD_line.write_index;
+            }
         }
+        time_out --;
     }
 }
 
