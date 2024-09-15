@@ -146,7 +146,7 @@ void CMD_Line_Task_Init()
         memset((void *)CMD_line.p_buffer, 0, sizeof(CMD_line.p_buffer));
     }
 
-    UART_Write(&RS232_UART, "GPC FIRMWARE V1.0.0\n", 20);
+    UART_Write(&RS232_UART, "GPP FIRMWARE V1.0.0\n", 20);
     UART_Write(&RS232_UART, "> ", 2);
     CMD_send_splash(&RS232_UART);
 }

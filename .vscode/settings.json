@@ -4,6 +4,7 @@
         "stm32f0xx_ll_gpio.h": "c",
         "cmd_line.h": "c",
         "cmd_line_task.h": "c",
-        "app.h": "c"
+        "app.h": "c",
+        "stdbool.h": "c"
     }
 }
