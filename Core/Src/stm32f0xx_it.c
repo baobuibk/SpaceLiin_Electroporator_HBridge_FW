@@ -22,6 +22,7 @@
 #include "stm32f0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -153,6 +154,19 @@ void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
   /* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 1 */
 
   /* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART3 to USART6 global interrupts.
+  */
+void USART3_6_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART3_6_IRQn 0 */
+  RS232_IRQHandler();
+  /* USER CODE END USART3_6_IRQn 0 */
+  /* USER CODE BEGIN USART3_6_IRQn 1 */
+
+  /* USER CODE END USART3_6_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

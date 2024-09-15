@@ -66,6 +66,9 @@
 
 #define DAC_SPI_CS_PORT         GPIOA
 #define DAC_SPI_CS_PIN          LL_GPIO_PIN_15
+
+#define DAC_nLDAC_PORT          GPIOB
+#define DAC_nLDAC_PIN           LL_GPIO_PIN_4
 /***********************************************/
 
 /**********************I2C**********************/
