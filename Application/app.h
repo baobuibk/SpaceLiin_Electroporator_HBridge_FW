@@ -14,6 +14,7 @@
 // INCLUDE TASK //
 #include "adc_task.h"
 #include "cmd_line_task.h"
+#include "h_bridge_task.h"
 
 // INCLUDE LIB //
 #include "uart.h"

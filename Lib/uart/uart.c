@@ -63,8 +63,35 @@ void UART_Init( uart_stdio_typedef* p_uart, USART_TypeDef* _handle,
         memset((void *)p_uart->p_RX_buffer, 0, sizeof(p_uart->p_RX_buffer));
     }
 
-    // Start the receive IT, it will only run when there is a data send to the MCU.
+    // Disable the TX IT
+    LL_USART_DisableIT_TXE(p_uart->handle);
+
+    // Start the RX IT, it will only run when there is a data send to the MCU.
     LL_USART_EnableIT_RXNE(p_uart->handle);
+}
+
+//*****************************************************************************
+//
+//! Send a char to the UART.
+//!
+//! \param pcBuf points to a buffer containing the string to transmit.
+//
+//*****************************************************************************
+void UART_Send_Char(uart_stdio_typedef* p_uart, const char *pcChar)
+{
+	UART_Write(p_uart, pcChar, 1);
+}
+
+//*****************************************************************************
+//
+//! Send the string to the UART.
+//!
+//! \param pcBuf points to a buffer containing the string to transmit.
+//
+//*****************************************************************************
+void UART_Send_String(uart_stdio_typedef* p_uart, const char *pcBuf)
+{
+	UART_Write(p_uart, pcBuf, strlen(pcBuf));
 }
 
 //*****************************************************************************
@@ -96,7 +123,7 @@ void UART_Init( uart_stdio_typedef* p_uart, USART_TypeDef* _handle,
 uint16_t UART_Write(uart_stdio_typedef* p_uart, const char *pcBuf, uint16_t ui16Len)
 {
 
-    unsigned int uIdx;
+    uint8_t uIdx;
 
     //
     // Check for valid arguments.
@@ -147,8 +174,14 @@ uint16_t UART_Write(uart_stdio_typedef* p_uart, const char *pcBuf, uint16_t ui16
     //
     if (LL_USART_IsEnabledIT_TXE(p_uart->handle) == false)
     {
-        LL_USART_EnableIT_TXE(p_uart->handle);
+        // NOTE: Turn on TXE after prime transmit,
+        // if turn on TXE b4 prime transmit create a
+        // bug where the index = 2 char don't get
+        // send.
+
+        //LL_USART_EnableIT_TXE(p_uart->handle);
         UART_Prime_Transmit(p_uart);
+        LL_USART_EnableIT_TXE(p_uart->handle);
     }
 
     //
@@ -757,7 +790,11 @@ void UART_Prime_Transmit(uart_stdio_typedef* p_uart)
     //
     if(!TX_BUFFER_EMPTY(p_uart))
     {
+        NVIC_DisableIRQ(p_uart->irqn);
+
         LL_USART_TransmitData8(p_uart->handle, p_uart->p_TX_buffer[p_uart->TX_read_index]);
         ADVANCE_TX_READ_INDEX(p_uart);
+        
+        NVIC_EnableIRQ(p_uart->irqn);
     }
 }

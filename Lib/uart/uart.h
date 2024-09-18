@@ -30,6 +30,8 @@ void UART_Init( uart_stdio_typedef* p_uart, USART_TypeDef* _handle,
                 IRQn_Type _irqn, char* _p_TX_buffer, char* _p_RX_buffer,
                 uint16_t _TX_size, uint16_t _RX_size);
 
+void        UART_Send_Char(uart_stdio_typedef* p_uart, const char *pcChar);
+void        UART_Send_String(uart_stdio_typedef* p_uart, const char *pcBuf);
 uint16_t    UART_Write(uart_stdio_typedef* p_uart, const char *pcBuf, uint16_t ui16Len);
 void        UART_Printf(uart_stdio_typedef* p_uart, const char *pc_string, ...);
 char        UART_Get_Char(uart_stdio_typedef* p_uart);

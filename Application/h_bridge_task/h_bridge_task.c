@@ -3,6 +3,8 @@
 
 #include "stm32f0xx_ll_gpio.h"
 
+#include "app.h"
+
 #include "h_bridge_task.h"
 
 #include "scheduler.h"
@@ -13,168 +15,193 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-/*
-typedef enum
-{
-    H_BRIDGE_POS_STATE,
-    H_BRDIGE_MINUS_STATE,
-    H_BRIDGE_WAIT,
-} H_Bridge_State_typedef;
-*/
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-PWM_TypeDef HighSide_PWM;
-PWM_TypeDef LowSide_PWM;
+PWM_TypeDef H_Bridge_1_PWM;
+PWM_TypeDef H_Bridge_2_PWM;
 
-H_Bridge_State_typedef H_Bridge_State = H_BRIDGE_POS_STATE;
+H_Bridge_State_typedef H_Bridge_State = H_BRIDGE_1_STATE;
 
-static          bool        is_h_bridge_enable      = false;
-static volatile uint16_t    high_side_pulse_count   = 0;
-static volatile uint16_t    low_side_pulse_count    = 0;
+static          bool        is_h_bridge_set_up      = false;
+volatile        uint16_t    high_side_pulse_count   = 0;
+volatile        uint16_t    low_side_pulse_count    = 0;
 static volatile bool        is_5s_set_up            = false;
 static volatile bool        is_5s_finished          = false;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+bool        is_h_bridge_enable          = false;
+uint8_t     hs_on_time_ms               = 1;
+uint8_t     hs_off_time_ms              = 1;
+uint8_t     ls_on_time_ms               = 1;
+uint8_t     ls_off_time_ms              = 1;
+uint16_t    high_side_set_pulse_count   = 0;
+uint16_t    low_side_set_pulse_count    = 0;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: H Bridge Task Init :::::::: */
 void H_Bridge_Task_Init(void)
 {
-    // H bridge lowside
-    PWM_Init(&LowSide_PWM, TIM16, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM1, LL_TIM_OCPOLARITY_HIGH);
-    //PWM_Set_Freq(&LowSide_PWM, 1000);
-    PWM_Set_Freq(&LowSide_PWM, 100);
-    PWM_Set_Duty(&LowSide_PWM, 0);
-    PWM_Disable(&LowSide_PWM);
-    LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
-
-    // Enable Counter interupt for H bridge lowside
-    LL_TIM_SetUpdateSource(LowSide_PWM.TIMx, LL_TIM_UPDATESOURCE_COUNTER);
-    LL_TIM_EnableUpdateEvent(LowSide_PWM.TIMx);
-    LL_TIM_DisableIT_UPDATE(LowSide_PWM.TIMx);
-
+    uint32_t hs_freq, ls_freq;
     // H bridge highside
-    PWM_Init(&HighSide_PWM, TIM17, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM1, LL_TIM_OCPOLARITY_HIGH);
-    //PWM_Set_Freq(&HighSide_PWM, 1000);
-    PWM_Set_Freq(&HighSide_PWM, 100);
-    PWM_Set_Duty(&HighSide_PWM, 0);
-    PWM_Disable(&HighSide_PWM);
-    LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_8);
+    PWM_Init(&H_Bridge_1_PWM, H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM1, LL_TIM_OCPOLARITY_HIGH);
+    
+    hs_freq = 1000 / (hs_on_time_ms + hs_off_time_ms);
+    PWM_Set_Freq(&H_Bridge_1_PWM, hs_freq);
+    PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+    PWM_Disable(&H_Bridge_1_PWM);
+    LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
 
     // Enable Counter interupt for H bridge highside
-    LL_TIM_SetUpdateSource(HighSide_PWM.TIMx, LL_TIM_UPDATESOURCE_COUNTER);
-    LL_TIM_EnableUpdateEvent(HighSide_PWM.TIMx);
-    LL_TIM_DisableIT_UPDATE(HighSide_PWM.TIMx);
+    LL_TIM_SetUpdateSource(H_Bridge_1_PWM.TIMx, LL_TIM_UPDATESOURCE_COUNTER);
+    LL_TIM_EnableUpdateEvent(H_Bridge_1_PWM.TIMx);
+    LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
 
+    // H bridge lowside
+    PWM_Init(&H_Bridge_2_PWM, H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_PWM1, LL_TIM_OCPOLARITY_HIGH);
+    
+    ls_freq = 1000 / (ls_on_time_ms + ls_off_time_ms);
+    PWM_Set_Freq(&H_Bridge_2_PWM, ls_freq);
+    PWM_Set_Duty(&H_Bridge_2_PWM, 0);
+    PWM_Disable(&H_Bridge_2_PWM);
+    LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
+
+    // Enable Counter interupt for H bridge lowside
+    LL_TIM_SetUpdateSource(H_Bridge_2_PWM.TIMx, LL_TIM_UPDATESOURCE_COUNTER);
+    LL_TIM_EnableUpdateEvent(H_Bridge_2_PWM.TIMx);
+    LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
 }
 
 /* :::::::::: H Bridge Task ::::::::::::: */
-void H_Bridge_Task(void)
+void H_Bridge_Task(void*)
 {
     switch (H_Bridge_State)
     {
-    case H_BRIDGE_POS_STATE:
-        if(is_h_bridge_enable == false)
+    case H_BRIDGE_STOP_STATE:
+        // Disable Update Interupt
+        LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
+        LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
+
+        // TURN OFF LOW AND HIGH FIRST
+        PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+        PWM_Set_Duty(&H_Bridge_2_PWM, 0);
+
+        // LOW AND HIGH SIDE GND ON
+        LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
+        LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
+
+        // DISABLE PWM
+        PWM_Disable(&H_Bridge_1_PWM);
+        PWM_Disable(&H_Bridge_2_PWM);
+
+        high_side_pulse_count = 0;
+        is_h_bridge_set_up = false;
+
+        if(is_h_bridge_enable == true)
         {
-            // TURN OFF LOW AND HIGH FIRST
-            PWM_Set_Duty(&HighSide_PWM, 0);
-            PWM_Set_Duty(&LowSide_PWM, 0);
-
-            // LOW SIDE GND ON
-            LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
-
-            // HIGH SIDE 300 ON
-            LL_GPIO_SetOutputPin(GPIOB, LL_GPIO_PIN_8);
-
-            // Turn Low side on, no switching
-            PWM_Set_Duty(&LowSide_PWM, 100);
-
-            // Turn High side on, switching @ 50% duty
-            //PWM_Set_Duty(&HighSide_PWM, 50);
-            PWM_Set_Duty(&HighSide_PWM, 50);
-
-            // Enable Update Interupt
-            LL_TIM_EnableIT_UPDATE(HighSide_PWM.TIMx);
-
-            // Enable Low and High side on
-            PWM_Enable(&LowSide_PWM);
-            PWM_Enable(&HighSide_PWM);
-
-            // Enable the flag
-            is_h_bridge_enable = true;
-        }
-        else if(high_side_pulse_count >= 10)
-        {
-            // Disable Update Interupt
-            LL_TIM_DisableIT_UPDATE(HighSide_PWM.TIMx);
-
-            // TURN OFF LOW AND HIGH FIRST
-            PWM_Set_Duty(&HighSide_PWM, 0);
-            PWM_Set_Duty(&LowSide_PWM, 0);
-
-            // LOW AND HIGH SIDE GND ON
-            LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
-            LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_8);
-
-            // DISABLE PWM
-            PWM_Disable(&HighSide_PWM);
-            PWM_Disable(&LowSide_PWM);
-
-            high_side_pulse_count = 0;
-            is_h_bridge_enable = false;
-            H_Bridge_State = H_BRDIGE_MINUS_STATE;
+            H_Bridge_State = H_BRIDGE_1_STATE;
         }
         break;
-    case H_BRDIGE_MINUS_STATE:
-        if (is_h_bridge_enable == false)
+    case H_BRIDGE_1_STATE:
+        if(is_h_bridge_set_up == false)
         {
             // TURN OFF LOW AND HIGH FIRST
-            PWM_Set_Duty(&LowSide_PWM, 0);
-            PWM_Set_Duty(&HighSide_PWM, 0);
+            PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+            PWM_Set_Duty(&H_Bridge_2_PWM, 0);
 
-            // HIGH SIDE GND ON
-            LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_8);
+            // LOW SIDE GND ON
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
 
-            // LOW SIDE 300 ON
-            LL_GPIO_SetOutputPin(GPIOA, LL_GPIO_PIN_5);
+            // HIGH SIDE 300 ON
+            LL_GPIO_SetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
 
-            // Turn High side on, no switching
-            PWM_Set_Duty(&HighSide_PWM, 100);
+            // Turn Low side on, no switching
+            PWM_Set_Duty(&H_Bridge_2_PWM, 100);
 
-            // Turn Low side on, switching @ 50% duty
-            //PWM_Set_Duty(&LowSide_PWM, 50);
-            PWM_Set_Duty(&LowSide_PWM, 50);
+            // Turn High side on, switching @ 50% duty
+            //PWM_Set_Duty(&H_Bridge_1_PWM, 50);
+            PWM_Set_Duty(&H_Bridge_1_PWM, 50);
 
             // Enable Update Interupt
-            LL_TIM_EnableIT_UPDATE(LowSide_PWM.TIMx);
+            LL_TIM_EnableIT_UPDATE(H_Bridge_1_PWM.TIMx);
 
             // Enable Low and High side on
-            PWM_Enable(&HighSide_PWM);
-            PWM_Enable(&LowSide_PWM);
+            PWM_Enable(&H_Bridge_2_PWM);
+            PWM_Enable(&H_Bridge_1_PWM);
 
             // Enable the flag
-            is_h_bridge_enable = true;
+            is_h_bridge_set_up = true;
         }
-        else if(low_side_pulse_count >= 10)
+        else if((high_side_pulse_count >= high_side_set_pulse_count) || (is_h_bridge_enable == false))
         {
             // Disable Update Interupt
-            LL_TIM_DisableIT_UPDATE(LowSide_PWM.TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
 
             // TURN OFF LOW AND HIGH FIRST
-            PWM_Set_Duty(&HighSide_PWM, 0);
-            PWM_Set_Duty(&LowSide_PWM, 0);
+            PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+            PWM_Set_Duty(&H_Bridge_2_PWM, 0);
 
             // LOW AND HIGH SIDE GND ON
-            LL_GPIO_ResetOutputPin(GPIOA, LL_GPIO_PIN_5);
-            LL_GPIO_ResetOutputPin(GPIOB, LL_GPIO_PIN_8);
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
 
             // DISABLE PWM
-            PWM_Disable(&HighSide_PWM);
-            PWM_Disable(&LowSide_PWM);
+            PWM_Disable(&H_Bridge_1_PWM);
+            PWM_Disable(&H_Bridge_2_PWM);
+
+            high_side_pulse_count = 0;
+            is_h_bridge_set_up = false;
+            H_Bridge_State = H_BRDIGE_2_STATE;
+        }
+        break;
+    case H_BRDIGE_2_STATE:
+        if (is_h_bridge_set_up == false)
+        {
+            // TURN OFF LOW AND HIGH FIRST
+            PWM_Set_Duty(&H_Bridge_2_PWM, 0);
+            PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+
+            // HIGH SIDE GND ON
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
+
+            // LOW SIDE 300 ON
+            LL_GPIO_SetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
+
+            // Turn High side on, no switching
+            PWM_Set_Duty(&H_Bridge_1_PWM, 100);
+
+            // Turn Low side on, switching @ 50% duty
+            //PWM_Set_Duty(&H_Bridge_2_PWM, 50);
+            PWM_Set_Duty(&H_Bridge_2_PWM, 50);
+
+            // Enable Update Interupt
+            LL_TIM_EnableIT_UPDATE(H_Bridge_2_PWM.TIMx);
+
+            // Enable Low and High side on
+            PWM_Enable(&H_Bridge_1_PWM);
+            PWM_Enable(&H_Bridge_2_PWM);
+
+            // Enable the flag
+            is_h_bridge_set_up = true;
+        }
+        else if((low_side_pulse_count >= low_side_set_pulse_count) || (is_h_bridge_enable == false))
+        {
+            // Disable Update Interupt
+            LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
+
+            // TURN OFF LOW AND HIGH FIRST
+            PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+            PWM_Set_Duty(&H_Bridge_2_PWM, 0);
+
+            // LOW AND HIGH SIDE GND ON
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
+
+            // DISABLE PWM
+            PWM_Disable(&H_Bridge_1_PWM);
+            PWM_Disable(&H_Bridge_2_PWM);
 
             low_side_pulse_count = 0;
-            is_h_bridge_enable = false;
-            H_Bridge_State = H_BRIDGE_WAIT;
+            is_h_bridge_set_up = false;
+            H_Bridge_State = H_BRIDGE_1_STATE;
 
             SchedulerTaskDisable(2);
         }
@@ -185,61 +212,23 @@ void H_Bridge_Task(void)
     }
 }
 
-void H_Bridge_5_Secconds_Task()
+/* ::::H_Bridge 1 Interupt Handle:::: */
+void H_Bridge_1_Interupt_Handle()
 {
-    switch (H_Bridge_State)
-    {
-        case H_BRIDGE_WAIT:
-        {
-            if(is_5s_set_up == false)
-            {
-                LL_TIM_EnableIT_UPDATE(TIM7);
-                LL_TIM_EnableCounter(TIM7);
-                is_5s_set_up = true;
-            }
-            else if(is_5s_finished == true)
-            {
-                LL_TIM_DisableIT_UPDATE(TIM7);
-                LL_TIM_DisableCounter(TIM7);
-                is_5s_set_up = false;
-                is_5s_finished = false;
-                H_Bridge_State = H_BRIDGE_POS_STATE;
-            }
-        }
-        break;
-
-    default:
-        break;
-    }
-}
-
-/* ::::H_Bridge High Side Interupt Handle:::: */
-void H_Bridge_High_Side_Interupt_Handle()
-{
-    if(LL_TIM_IsActiveFlag_UPDATE(HighSide_PWM.TIMx) == true)
+    if(LL_TIM_IsActiveFlag_UPDATE(H_Bridge_1_PWM.TIMx) == true)
     {
         high_side_pulse_count++;
-        LL_TIM_ClearFlag_UPDATE(HighSide_PWM.TIMx);
+        LL_TIM_ClearFlag_UPDATE(H_Bridge_1_PWM.TIMx);
     }
 }
 
-/* ::::H_Bridge Low Side Interupt Handle:::: */
-void H_Bridge_Low_Side_Interupt_Handle()
+/* ::::H_Bridge 2 Interupt Handle:::: */
+void H_Bridge_2_Interupt_Handle()
 {
-    if(LL_TIM_IsActiveFlag_UPDATE(LowSide_PWM.TIMx) == true)
+    if(LL_TIM_IsActiveFlag_UPDATE(H_Bridge_2_PWM.TIMx) == true)
     {
         low_side_pulse_count++;
-        LL_TIM_ClearFlag_UPDATE(LowSide_PWM.TIMx);
-    }
-}
-
-/* ::::H_Bridge 5 secconds Interupt Handle:::: */
-void H_Bridge_5_Secconds_Interupt_Handle()
-{
-    if(LL_TIM_IsActiveFlag_UPDATE(TIM7) == true)
-    {
-        is_5s_finished = true;
-        LL_TIM_ClearFlag_UPDATE(TIM7);
+        LL_TIM_ClearFlag_UPDATE(H_Bridge_2_PWM.TIMx);
     }
 }
 

@@ -3,10 +3,17 @@
 
 //TODO: Create a system to handle hard fault or smth like that.
 
-#define         SCHEDULER_TASK_COUNT  1
+#define         SCHEDULER_TASK_COUNT  2
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
 tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                 {
+                    {
+                            &H_Bridge_Task,
+                            (void *) 0,
+                            5,                          //call every 500us
+                            0,                          //count from start
+                            true                        //is active
+                    },
                     {
                             &CMD_Line_Task,
                             (void *) 0,

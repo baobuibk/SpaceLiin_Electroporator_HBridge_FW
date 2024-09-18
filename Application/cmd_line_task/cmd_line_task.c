@@ -33,13 +33,14 @@ char                g_RS232_UART_RX_buffer[64];
 cmd_line_typedef    CMD_line;
 char                g_CMD_line_buffer[64];
 
-static const char * ErrorCode[5] = 
+static const char * ErrorCode[6] =
 {
     "OK\n",
     "CMDLINE_BAD_CMD\n",
     "CMDLINE_TOO_MANY_ARGS\n",
     "CMDLINE_TOO_FEW_ARGS\n",
-    "CMDLINE_INVALID_ARG\n" 
+    "CMDLINE_INVALID_ARG\n",
+    "CMDLINE_INVALID_CMD\n",
 };
 
 const char SPLASH[][65] = 
@@ -83,8 +84,16 @@ static uint16_t     retreat_buffer_index(volatile uint16_t* pui16Index, uint16_t
 static void         CMD_send_splash(uart_stdio_typedef* p_uart);
 
        int          CMD_debug_led_on(int argc, char *argv[]);
-
        int          CMD_debug_led_off(int argc, char *argv[]);
+       int          CMD_set_pulse_count(int argc, char *argv[]);
+       int          CMD_set_hs_pulse_timing(int argc, char *argv[]);
+       int          CMD_set_ls_pulse_timing(int argc, char *argv[]);
+       int          CMD_pulse_start(int argc, char *argv[]);
+       int          CMD_pulse_stop(int argc, char *argv[]);
+       int          CMD_stop_cuvette(int argc, char *argv[]);
+       int          CMD_set_cuvette(int argc, char *argv[]);
+static void         decode_ls_cuvette(uint8_t cuvette_code);
+static void         decode_hs_cuvette(uint8_t cuvette_code);
 
 //*****************************************************************************
 //
@@ -124,6 +133,13 @@ tCmdLineEntry g_psCmdTable[] =
 {
     { "GPC_DEBUG_LED_ON", CMD_debug_led_on, "Turn on debug led" },
     { "GPC_DEBUG_LED_OFF", CMD_debug_led_off, "Turn off debug led" },
+    { "GPC_SET_PULSE_COUNT", CMD_set_pulse_count, "Set number of pulse" },
+    { "GPC_SET_HS_PULSE_TIMING", CMD_set_hs_pulse_timing, "Set hs pulse on time and off time" },
+    { "GPC_SET_LS_PULSE_TIMING", CMD_set_ls_pulse_timing, "Set ls pulse on time and off time" },
+    { "GPC_PULSE_START", CMD_pulse_start, "Start pulsing" },
+    { "GPC_PULSE_STOP", CMD_pulse_stop, "Stop pulsing" },
+    { "GPC_STOP_CUVETTE", CMD_stop_cuvette, "Stop cuvette"},
+    { "GPC_SET_CUVETTE", CMD_set_cuvette, "Set up cuvette"},
 	{0,0,0}
 };
 
@@ -146,21 +162,31 @@ void CMD_Line_Task_Init()
         memset((void *)CMD_line.p_buffer, 0, sizeof(CMD_line.p_buffer));
     }
 
-    UART_Write(&RS232_UART, "GPP FIRMWARE V1.0.0\n", 20);
-    UART_Write(&RS232_UART, "> ", 2);
-    CMD_send_splash(&RS232_UART);
+    UART_Send_String(&RS232_UART, "GPC FIRMWARE V1.0.0\n");
+    UART_Send_String(&RS232_UART, "> ");
+    //CMD_send_splash(&RS232_UART);
 }
 
 /* :::::::::: CMD Line Task ::::::::::::: */
 void CMD_Line_Task(void*)
 {
-    uint8_t return_value;
-    uint8_t time_out = 50;
+    uint8_t cmd_return, time_out;
 
-    while((!RX_BUFFER_EMPTY(&RS232_UART)) && (time_out != 0))
+    for(time_out = 50; (!RX_BUFFER_EMPTY(&RS232_UART)) && (time_out != 0); time_out--)
     {
         CMD_line.RX_char = UART_Get_Char(&RS232_UART);
-        UART_Write(&RS232_UART, &CMD_line.RX_char, 1);
+        
+        if(((CMD_line.RX_char == 8) || (CMD_line.RX_char == 127)))
+        {
+            if (CMD_BUFFER_EMPTY(&CMD_line))
+                break;
+
+            RETREAT_CMD_WRITE_INDEX(&CMD_line);
+            UART_Send_Char(&RS232_UART, &CMD_line.RX_char);
+            break;
+        }
+
+        UART_Send_Char(&RS232_UART, &CMD_line.RX_char);
 
         if((CMD_line.RX_char == '\r') || (CMD_line.RX_char == '\n'))
         {
@@ -170,22 +196,17 @@ void CMD_Line_Task(void*)
                 CMD_line.p_buffer[CMD_line.write_index] = 0;
                 ADVANCE_CMD_WRITE_INDEX(&CMD_line);
 
-                return_value = CmdLineProcess(&CMD_line.p_buffer[CMD_line.read_index]);
+                cmd_return = CmdLineProcess(&CMD_line.p_buffer[CMD_line.read_index]);
                 CMD_line.read_index = CMD_line.write_index;
 
-                UART_Write(&RS232_UART, "> ", 2);
-                UART_Printf(&RS232_UART, ErrorCode[return_value]);
-                UART_Write(&RS232_UART, "> ", 2);
+                UART_Send_String(&RS232_UART, "> ");
+                UART_Printf(&RS232_UART, ErrorCode[cmd_return]);
+                UART_Send_String(&RS232_UART, "> ");
             }
             else
             {
-                UART_Write(&RS232_UART, "> ", 2);
+                UART_Send_String(&RS232_UART, "> ");
             }
-        }
-        else if((CMD_line.RX_char == 8) || (CMD_line.RX_char == 127))
-        {
-            if(!CMD_BUFFER_EMPTY(&CMD_line))
-                RETREAT_CMD_WRITE_INDEX(&CMD_line);
         }
         else
         {
@@ -194,10 +215,13 @@ void CMD_Line_Task(void*)
 
             if (CMD_BUFFER_FULL(&CMD_line))
             {
-                CMD_line.read_index = CMD_line.write_index;
+                // SDKLFJSDFKS
+                // > CMD too long!
+                // > 
+                UART_Send_String(&RS232_UART, "\n> CMD too long!\n> ");
+                CMD_line.write_index = CMD_line.read_index;
             }
         }
-        time_out --;
     }
 }
 
@@ -211,6 +235,195 @@ int CMD_debug_led_off(int argc, char *argv[])
 {
     LL_GPIO_ResetOutputPin(DEBUG_LED_PORT, DEBUG_LED_PIN);
     return CMDLINE_OK;
+}
+
+int CMD_set_pulse_count(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        return CMDLINE_TOO_FEW_ARGS;
+    }
+    else if (argc > 3)
+    {
+        return CMDLINE_TOO_MANY_ARGS;
+    }
+
+    if ((atoi(argv[1]) > 20) || (atoi(argv[2]) > 20))
+    {
+        return CMDLINE_INVALID_ARG;
+    }
+
+    high_side_set_pulse_count   = atoi(argv[1]);
+    low_side_set_pulse_count    = atoi(argv[2]);
+
+    return CMDLINE_OK;
+}
+
+int CMD_set_hs_pulse_timing(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        return CMDLINE_TOO_FEW_ARGS;
+    }
+    else if (argc > 3)
+    {
+        return CMDLINE_TOO_MANY_ARGS;
+    }
+    
+    if ((atoi(argv[1]) > 20) || (atoi(argv[1]) < 1))
+    {
+        return CMDLINE_INVALID_ARG;
+    }
+    else if ((atoi(argv[2]) > 20) || (atoi(argv[2]) < 1))
+    {
+        return CMDLINE_INVALID_ARG;
+    }
+
+    hs_on_time_ms   = atoi(argv[1]);
+    hs_off_time_ms  = atoi(argv[2]);
+
+    return CMDLINE_OK;
+}
+
+int CMD_set_ls_pulse_timing(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        return CMDLINE_TOO_FEW_ARGS;
+    }
+    else if (argc > 3)
+    {
+        return CMDLINE_TOO_MANY_ARGS;
+    }
+    
+    if ((atoi(argv[1]) > 7) || (atoi(argv[2]) > 7))
+    {
+        return CMDLINE_INVALID_ARG;
+    }
+
+    ls_on_time_ms   = atoi(argv[1]);
+    ls_off_time_ms  = atoi(argv[2]);
+
+    return CMDLINE_OK;
+}
+
+int CMD_pulse_start(int argc, char *argv[])
+{
+    if (argc > 1)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    is_h_bridge_enable = true;
+    return CMDLINE_OK;
+}
+
+int CMD_pulse_stop(int argc, char *argv[])
+{
+    if (argc > 1)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    is_h_bridge_enable = false;
+    return CMDLINE_OK;
+}
+
+int CMD_stop_cuvette(int argc, char *argv[])
+{
+    if (argc > 1)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    LL_GPIO_ResetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
+    LL_GPIO_ResetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
+
+    return CMDLINE_OK;
+}
+
+int CMD_set_cuvette(int argc, char *argv[])
+{
+    if (is_h_bridge_enable == true)
+    {
+        return CMDLINE_INVALID_CMD;
+    }
+
+    if (argc < 3)
+    {
+        return CMDLINE_TOO_FEW_ARGS;
+    }
+    else if (argc > 3)
+    {
+        return CMDLINE_TOO_MANY_ARGS;
+    }
+    
+    if ((atoi(argv[1]) > 7) || (atoi(argv[2]) > 7))
+    {
+        return CMDLINE_INVALID_ARG;
+    }
+
+    decode_hs_cuvette(atoi(argv[1]));
+    decode_ls_cuvette(atoi(argv[2]));
+
+    LL_GPIO_SetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
+    LL_GPIO_SetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
+
+    return CMDLINE_OK;
+}
+
+static void decode_ls_cuvette(uint8_t cuvette_code)
+{
+    if (cuvette_code & 0b001)
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
+    }
+    else
+    {
+        LL_GPIO_SetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
+    }
+    
+    if (cuvette_code & 0b010)
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
+    }
+    else
+    {
+        LL_GPIO_SetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
+    }
+
+    if (cuvette_code & 0b100)
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
+    }
+    else
+    {
+        LL_GPIO_SetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
+    }
+}
+
+static void decode_hs_cuvette(uint8_t cuvette_code)
+{
+    if (cuvette_code & 0b001)
+    {
+        LL_GPIO_ResetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
+    }
+    else
+    {
+        LL_GPIO_SetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
+    }
+    
+    if (cuvette_code & 0b010)
+    {
+        LL_GPIO_ResetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
+    }
+    else
+    {
+        LL_GPIO_SetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
+    }
+
+    if (cuvette_code & 0b100)
+    {
+        LL_GPIO_ResetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
+    }
+    else
+    {
+        LL_GPIO_SetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
+    }
 }
 
 /* :::::::::: IRQ Handler ::::::::::::: */
@@ -234,10 +447,21 @@ void RS232_IRQHandler(void)
     {
         RS232_UART.RX_irq_char = LL_USART_ReceiveData8(RS232_UART.handle);
 
-        if((!RX_BUFFER_FULL(&RS232_UART)) && (RS232_UART.RX_irq_char != '\r'))
+        // NOTE: On win 10, default PUTTY when hit enter only send back '\r',
+        // while on default HERCULES when hit enter send '\r\n' in that order.
+        // The code bellow is modified so that it can work on PUTTY and HERCULES.
+        if((!RX_BUFFER_FULL(&RS232_UART)) && (RS232_UART.RX_irq_char != '\n'))
         {
-            RS232_UART.p_RX_buffer[RS232_UART.RX_write_index] = RS232_UART.RX_irq_char;
-            ADVANCE_RX_WRITE_INDEX(&RS232_UART);
+            if (RS232_UART.RX_irq_char == '\r')
+            {
+                RS232_UART.p_RX_buffer[RS232_UART.RX_write_index] = '\n';
+                ADVANCE_RX_WRITE_INDEX(&RS232_UART);
+            }
+            else
+            {
+                RS232_UART.p_RX_buffer[RS232_UART.RX_write_index] = RS232_UART.RX_irq_char;
+                ADVANCE_RX_WRITE_INDEX(&RS232_UART);
+            }
         }
     }
 }
@@ -367,9 +591,9 @@ static void CMD_send_splash(uart_stdio_typedef* p_uart)
 {
     for(uint8_t i = 0 ; i < 21 ; i++)
     {
-		UART_Write(p_uart, &SPLASH[i][0], 65);
+		UART_Send_String(p_uart, &SPLASH[i][0]);
 	}
-	UART_Write(p_uart, "> ", 2);
+	UART_Send_String(p_uart, "> ");
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

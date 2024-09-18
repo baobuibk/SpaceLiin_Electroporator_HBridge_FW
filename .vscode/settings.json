@@ -5,6 +5,9 @@
         "cmd_line.h": "c",
         "cmd_line_task.h": "c",
         "app.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "h_bridge_task.h": "c",
+        "stm32f030xc.h": "c",
+        "scheduler.h": "c"
     }
 }
