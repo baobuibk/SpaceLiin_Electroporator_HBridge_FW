@@ -34,18 +34,18 @@
 #define H_BRIDGE_HIN2_PIN       LL_GPIO_PIN_5
 /***********************************************/
 
-/*********************CHARGE PUMP***************/
-#define C_PUMP_LIN1_HANDLE      TIM3
-#define C_PUMP_LIN1_CHANNEL     LL_TIM_CHANNEL_CH2
+/*****************Voltage Switching*************/
+#define V_SWITCH_LIN1_HANDLE    TIM3
+#define V_SWITCH_LIN1_CHANNEL   LL_TIM_CHANNEL_CH2
 
-#define C_PUMP_HIN1_PORT        GPIOB
-#define C_PUMP_HIN1_PIN         LL_GPIO_PIN_0
+#define V_SWITCH_HIN1_PORT      GPIOB
+#define V_SWITCH_HIN1_PIN       LL_GPIO_PIN_0
 
-#define C_PUMP_LIN2_HANDLE      TIM16
-#define C_PUMP_LIN2_CHANNEL     LL_TIM_CHANNEL_CH1
+#define V_SWITCH_LIN2_HANDLE    TIM16
+#define V_SWITCH_LIN2_CHANNEL   LL_TIM_CHANNEL_CH1
 
-#define C_PUMP_HIN2_PORT        GPIOB
-#define C_PUMP_HIN2_PIN         LL_GPIO_PIN_9
+#define V_SWITCH_HIN2_PORT      GPIOB
+#define V_SWITCH_HIN2_PIN       LL_GPIO_PIN_9
 /***********************************************/
 
 /***********************RELAY*******************/
@@ -57,8 +57,8 @@
 #define RS232_UART_HANDLE       USART3
 #define RS232_UART_IRQ          USART3_6_IRQn
 
-#define GPP_UART_HANDLE         USART1
-#define GPP_UART_IRQ            USART1_IRQn
+#define GPC_UART_HANDLE         USART1
+#define GPC_UART_IRQ            USART1_IRQn
 /***********************************************/
 
 /**********************SPI**********************/

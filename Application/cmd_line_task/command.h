@@ -1,5 +1,5 @@
-#ifndef CMD_LINE_TASK_H_
-#define CMD_LINE_TASK_H_
+#ifndef COMMAND_H_
+#define COMMAND_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdint.h>
@@ -12,15 +12,16 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: CMD Line Task Init :::::::: */
-void CMD_Line_Task_Init();
+int CMD_LINE_TEST(int argc, char *argv[]);
 
-/* :::::::::: CMD Line Task ::::::::::::: */
-void CMD_Line_Task(void*);
+int GPC_PULSE_COUNT(int argc, char *argv[]);
+int GPC_PULSE_HS_DURATION(int argc, char *argv[]);
+int GPC_PULSE_LS_DURATION(int argc, char *argv[]);
+int GPC_PULSE_CONTROL(int argc, char *argv[]);
 
-/* :::::::::: IRQ Handler ::::::::::::: */
-void RS232_IRQHandler(void);
-void GPC_UART_IRQHandler(void);
+int GPC_CUVETTE_CONTROL(int argc, char *argv[]);
+int GPC_CUVETTE_ELECTRODE(int argc, char *argv[]);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#endif /* CMD_LINE_TASK_H_ */
+#endif /* COMMAND_H_ */

@@ -46,7 +46,8 @@ void PWM_Init(PWM_TypeDef *PWMx, TIM_TypeDef *TIMx, uint32_t Channel, uint32_t M
     
     // Set PWM DUTY for channel 1
     PWMx->Duty = 0;
-    LL_TIM_OC_SetCompareCH1(PWMx->TIMx, PWMx->Duty);
+    //LL_TIM_OC_SetCompareCH1(PWMx->TIMx, PWMx->Duty);
+    PWM_Set_Duty(PWMx->TIMx, PWMx->Duty);
 
     // Enable the PWM FREQ and PWM DUTY
     LL_TIM_EnableARRPreload(PWMx->TIMx);
@@ -68,7 +69,7 @@ void PWM_Init(PWM_TypeDef *PWMx, TIM_TypeDef *TIMx, uint32_t Channel, uint32_t M
   */
 void PWM_Enable(PWM_TypeDef *PWMx)
 {
-    if((PWMx->TIMx == TIM16) || (PWMx->TIMx == TIM17))
+    if((PWMx->TIMx == TIM14) || (PWMx->TIMx == TIM15) || (PWMx->TIMx == TIM16) || (PWMx->TIMx == TIM17))
     {
         // Sellect off state when run or disable
         LL_TIM_SetOffStates(PWMx->TIMx, LL_TIM_OSSI_ENABLE, LL_TIM_OSSR_ENABLE);
@@ -108,7 +109,7 @@ void PWM_Enable(PWM_TypeDef *PWMx)
   */
 void PWM_Disable(PWM_TypeDef *PWMx)
 {
-    if((PWMx->TIMx == TIM16) || (PWMx->TIMx == TIM17))
+    if((PWMx->TIMx == TIM14) || (PWMx->TIMx == TIM15) || (PWMx->TIMx == TIM16) || (PWMx->TIMx == TIM17))
     {
         // Enable MOE (Main output enable)
         LL_TIM_DisableAllOutputs(PWMx->TIMx);
@@ -132,8 +133,25 @@ void PWM_Set_Duty(PWM_TypeDef *PWMx, uint32_t _Duty)
       return;
 
     // Set PWM DUTY for channel 1
-    PWMx->Duty = (PWMx->Freq * (_Duty / 100.0)) + 1;
-    LL_TIM_OC_SetCompareCH1(PWMx->TIMx, PWMx->Duty);
+    PWMx->Duty = (PWMx->Freq * (_Duty / 100.0));
+    switch (PWMx->Channel)
+    {
+    case LL_TIM_CHANNEL_CH1:
+        LL_TIM_OC_SetCompareCH1(PWMx->TIMx, PWMx->Duty);
+        break;
+    case LL_TIM_CHANNEL_CH2:
+        LL_TIM_OC_SetCompareCH2(PWMx->TIMx, PWMx->Duty);
+        break;
+    case LL_TIM_CHANNEL_CH3:
+        LL_TIM_OC_SetCompareCH3(PWMx->TIMx, PWMx->Duty);
+        break;
+    case LL_TIM_CHANNEL_CH4:
+        LL_TIM_OC_SetCompareCH4(PWMx->TIMx, PWMx->Duty);
+        break;
+
+    default:
+        break;
+    }
 }
 
 void PWM_Set_Freq(PWM_TypeDef *PWMx, uint32_t _Freq)

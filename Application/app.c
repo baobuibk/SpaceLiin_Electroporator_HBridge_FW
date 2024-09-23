@@ -10,14 +10,14 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                     {
                             &H_Bridge_Task,
                             (void *) 0,
-                            5,                          //call every 500us
+                            15,                          //call every 500us
                             0,                          //count from start
                             true                        //is active
                     },
                     {
                             &CMD_Line_Task,
                             (void *) 0,
-                            10,                         //call every 1ms
+                            5,                         //call every 1ms
                             0,                          //count from start
                             true                        //is active
                     },
@@ -29,6 +29,7 @@ void App_Main(void)
     // can run scheduler tick max @ 100us.
     SchedulerInit(10000);
 
+    H_Bridge_Task_Init();
     CMD_Line_Task_Init();
 
     while (1)

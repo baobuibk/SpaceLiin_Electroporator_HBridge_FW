@@ -81,6 +81,7 @@ NVIC.TIM15_IRQn=true\:3\:0\:true\:false\:true\:true\:true\:true
 NVIC.TIM1_BRK_UP_TRG_COM_IRQn=true\:3\:0\:false\:false\:true\:false\:true\:true
 NVIC.TimeBase=TIM1_BRK_UP_TRG_COM_IRQn
 NVIC.TimeBaseIP=TIM1
+NVIC.USART1_IRQn=true\:2\:0\:true\:false\:true\:true\:true\:true
 NVIC.USART3_6_IRQn=true\:2\:0\:true\:false\:true\:true\:true\:true
 PA0.GPIOParameters=GPIO_PuPd
 PA0.GPIO_PuPd=GPIO_PULLUP

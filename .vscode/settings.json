@@ -8,6 +8,7 @@
         "stdbool.h": "c",
         "h_bridge_task.h": "c",
         "stm32f030xc.h": "c",
-        "scheduler.h": "c"
+        "scheduler.h": "c",
+        "command.h": "c"
     }
 }
