@@ -51,7 +51,7 @@ uint16_t    low_side_set_pulse_count    = 0;
 /* :::::::::: H Bridge Task Init :::::::: */
 void H_Bridge_Task_Init(void)
 {
-    // H bridge highside
+    // H bridge 1 init
     PWM_Init(&H_Bridge_1_PWM, H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM1, LL_TIM_OCPOLARITY_HIGH);
     PWM_Disable(&H_Bridge_1_PWM);
     LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
@@ -59,7 +59,7 @@ void H_Bridge_Task_Init(void)
     // Enable Counter interupt for H bridge highside
     //LL_TIM_SetUpdateSource(H_Bridge_1_PWM.TIMx, LL_TIM_UPDATESOURCE_COUNTER);
     //LL_TIM_EnableUpdateEvent(H_Bridge_1_PWM.TIMx);
-    LL_TIM_DisableIT_CC1(H_Bridge_1_PWM.TIMx);
+    //LL_TIM_DisableIT_CC1(H_Bridge_1_PWM.TIMx);
 
     // H bridge lowside
     PWM_Init(&H_Bridge_2_PWM, H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_PWM1, LL_TIM_OCPOLARITY_HIGH);
@@ -70,7 +70,7 @@ void H_Bridge_Task_Init(void)
     //LL_TIM_SetUpdateSource(H_Bridge_2_PWM.TIMx, LL_TIM_UPDATESOURCE_COUNTER);
     //LL_TIM_EnableUpdateEvent(H_Bridge_2_PWM.TIMx);
     //LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
-    LL_TIM_DisableIT_CC2(H_Bridge_1_PWM.TIMx);
+    //LL_TIM_DisableIT_CC2(H_Bridge_1_PWM.TIMx);
 
     LL_GPIO_ResetOutputPin(V_SWITCH_HIN2_PORT, V_SWITCH_HIN2_PIN);
     LL_GPIO_SetOutputPin(V_SWITCH_HIN1_PORT, V_SWITCH_HIN1_PIN);
