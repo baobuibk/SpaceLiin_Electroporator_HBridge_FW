@@ -16,11 +16,15 @@ typedef enum
 extern H_Bridge_State_typedef   H_Bridge_State;
 extern bool                     is_h_bridge_enable;
 
+extern uint8_t                  hs_on_time_ms;
+extern uint8_t                  hs_off_time_ms;
 extern uint8_t                  hs_duty;
-extern uint32_t                  hs_freq;
+extern uint32_t                 hs_freq;
 
+extern uint8_t                  ls_on_time_ms;
+extern uint8_t                  ls_off_time_ms;
 extern uint8_t                  ls_duty;
-extern uint32_t                  ls_freq;
+extern uint32_t                 ls_freq;
 
 extern uint16_t                 high_side_set_pulse_count;
 extern uint16_t                 low_side_set_pulse_count;

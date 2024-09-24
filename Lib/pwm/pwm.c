@@ -3,8 +3,6 @@
 #include "stm32f0xx_ll_rcc.h"
 #include "stm32f0xx_ll_tim.h"
 
-#define APB1_TIMER_CLK \
-__LL_RCC_CALC_PCLK1_FREQ(__LL_RCC_CALC_HCLK_FREQ(SystemCoreClock, LL_RCC_GetAHBPrescaler()), LL_RCC_GetAPB1Prescaler())
 /**
   * @brief  Define the behavior of the PWM.
   * @note   The Pin is set to high so that the FET is turned off.
@@ -29,32 +27,58 @@ __LL_RCC_CALC_PCLK1_FREQ(__LL_RCC_CALC_HCLK_FREQ(SystemCoreClock, LL_RCC_GetAHBP
   *         @arg @ref LL_TIM_OCPOLARITY_LOW
   * @retval None
   */
-void PWM_Init(PWM_TypeDef *PWMx, TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Mode, uint32_t Polarity)
+void PWM_Init(PWM_TypeDef *PWMx)
 {
     // Set PWM MODE
-    PWMx->TIMx    = TIMx;
-    PWMx->Channel = Channel;
-    PWMx->Mode    = Mode;
     LL_TIM_OC_SetMode(PWMx->TIMx, PWMx->Channel, PWMx->Mode);
-
-    PWMx->Polarity = Polarity;
     LL_TIM_OC_SetPolarity(PWMx->TIMx, PWMx->Channel, PWMx->Polarity);
+    LL_TIM_SetPrescaler(PWMx->TIMx, PWMx->Prescaler);
 
     // Set PWM FREQ
-    PWMx->Freq = __LL_TIM_CALC_ARR(APB1_TIMER_CLK, LL_TIM_GetPrescaler(PWMx->TIMx), 100000);
-    LL_TIM_SetAutoReload(PWMx->TIMx, PWMx->Freq);
+    if (PWMx->Freq > 0)
+    {
+        PWM_Set_Freq(PWMx, PWMx->Freq);
+    }
     
-    // Set PWM DUTY for channel 1
-    PWMx->Duty = 0;
-    //LL_TIM_OC_SetCompareCH1(PWMx->TIMx, PWMx->Duty);
-    PWM_Set_Duty(PWMx->TIMx, PWMx->Duty);
+    // Set PWM DUTY
+    if (PWMx->Duty > 0)
+    {
+        switch (PWMx->Channel)
+        {
+        case LL_TIM_CHANNEL_CH1:
+            LL_TIM_OC_SetCompareCH1(PWMx->TIMx, PWMx->Duty);
+            break;
+        case LL_TIM_CHANNEL_CH2:
+            LL_TIM_OC_SetCompareCH2(PWMx->TIMx, PWMx->Duty);
+            break;
+        case LL_TIM_CHANNEL_CH3:
+            LL_TIM_OC_SetCompareCH3(PWMx->TIMx, PWMx->Duty);
+            break;
+        case LL_TIM_CHANNEL_CH4:
+            LL_TIM_OC_SetCompareCH4(PWMx->TIMx, PWMx->Duty);
+            break;
+
+        default:
+            break;
+        }
+    }
 
     // Enable the PWM FREQ and PWM DUTY
     LL_TIM_EnableARRPreload(PWMx->TIMx);
     LL_TIM_OC_EnablePreload(PWMx->TIMx, PWMx->Channel);
 
-    // After change and enable make an event update
-    LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+    LL_TIM_SetUpdateSource(PWMx->TIMx, LL_TIM_UPDATESOURCE_REGULAR);
+
+    if (LL_TIM_IsEnabledIT_UPDATE(PWMx->TIMx))
+    {
+        LL_TIM_DisableIT_UPDATE(PWMx->TIMx);
+        LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+        LL_TIM_EnableIT_UPDATE(PWMx->TIMx);
+    }
+    else
+    {
+        LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+    }
 }
 
 /**
@@ -128,6 +152,8 @@ void PWM_Disable(PWM_TypeDef *PWMx)
 
 void PWM_Set_Duty(PWM_TypeDef *PWMx, uint32_t _Duty)
 {
+    LL_TIM_DisableUpdateEvent(PWMx->TIMx);
+
     // Limit the duty to 100
     if (_Duty > 100)
       return;
@@ -152,11 +178,39 @@ void PWM_Set_Duty(PWM_TypeDef *PWMx, uint32_t _Duty)
     default:
         break;
     }
+
+    LL_TIM_EnableUpdateEvent(PWMx->TIMx);
+
+    if (LL_TIM_IsEnabledIT_UPDATE(PWMx->TIMx))
+    {
+        LL_TIM_DisableIT_UPDATE(PWMx->TIMx);
+        LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+        LL_TIM_EnableIT_UPDATE(PWMx->TIMx);
+    }
+    else
+    {
+        LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+    }
 }
 
 void PWM_Set_Freq(PWM_TypeDef *PWMx, uint32_t _Freq)
 {
+    LL_TIM_DisableUpdateEvent(PWMx->TIMx);
+
     // Set PWM FREQ
     PWMx->Freq = __LL_TIM_CALC_ARR(APB1_TIMER_CLK, LL_TIM_GetPrescaler(PWMx->TIMx), _Freq);
     LL_TIM_SetAutoReload(PWMx->TIMx, PWMx->Freq);
+
+    LL_TIM_EnableUpdateEvent(PWMx->TIMx);
+
+    if (LL_TIM_IsEnabledIT_UPDATE(PWMx->TIMx))
+    {
+        LL_TIM_DisableIT_UPDATE(PWMx->TIMx);
+        LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+        LL_TIM_EnableIT_UPDATE(PWMx->TIMx);
+    }
+    else
+    {
+        LL_TIM_GenerateEvent_UPDATE(PWMx->TIMx);
+    }
 }

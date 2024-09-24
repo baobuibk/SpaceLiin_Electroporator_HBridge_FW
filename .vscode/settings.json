@@ -9,6 +9,9 @@
         "h_bridge_task.h": "c",
         "stm32f030xc.h": "c",
         "scheduler.h": "c",
-        "command.h": "c"
+        "command.h": "c",
+        "stm32f0xx_ll_tim.h": "c",
+        "pwm.h": "c",
+        "stdint.h": "c"
     }
 }

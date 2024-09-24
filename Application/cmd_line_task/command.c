@@ -86,11 +86,14 @@ int GPC_PULSE_HS_DURATION(int argc, char *argv[])
     else if ((receive_argm[1] > 20) || (receive_argm[1] < 1))
         return CMDLINE_INVALID_ARG;
 
-    hs_duty = (receive_argm[0] * 100) / (receive_argm[0] + receive_argm[1]);
-    hs_freq = 1000 / (receive_argm[0] + receive_argm[1]);
+    hs_on_time_ms = receive_argm[0];
+    hs_off_time_ms = receive_argm[1];
 
-    PWM_Set_Freq(&H_Bridge_1_PWM, hs_freq);
-    PWM_Set_Duty(&H_Bridge_1_PWM, hs_duty);
+    //hs_duty = (hs_on_time_ms * 100) / (hs_on_time_ms + hs_off_time_ms);
+    //hs_freq = 1000 / (hs_on_time_ms + hs_off_time_ms);
+
+    //PWM_Set_Freq(&H_Bridge_1_PWM, hs_freq);
+    //PWM_Set_Duty(&H_Bridge_1_PWM, hs_duty);
     return CMDLINE_OK;
 }
 
@@ -111,11 +114,14 @@ int GPC_PULSE_LS_DURATION(int argc, char *argv[])
     else if ((receive_argm[1] > 20) || (receive_argm[1] < 1))
         return CMDLINE_INVALID_ARG;
 
-    ls_duty = (receive_argm[0] * 100) / (receive_argm[0] + receive_argm[1]);
-    ls_freq = 1000 / (receive_argm[0] + receive_argm[1]);
+    ls_on_time_ms = receive_argm[0];
+    ls_off_time_ms = receive_argm[1];
 
-    PWM_Set_Freq(&H_Bridge_2_PWM, hs_freq);
-    PWM_Set_Duty(&H_Bridge_2_PWM, hs_duty);
+    //ls_duty = (receive_argm[0] * 100) / (receive_argm[0] + receive_argm[1]);
+    //ls_freq = 1000 / (receive_argm[0] + receive_argm[1]);
+
+    //PWM_Set_Freq(&H_Bridge_2_PWM, hs_freq);
+    //PWM_Set_Duty(&H_Bridge_2_PWM, hs_duty);
 
     return CMDLINE_OK;
 }
