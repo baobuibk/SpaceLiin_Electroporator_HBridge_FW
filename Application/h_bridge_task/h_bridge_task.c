@@ -55,6 +55,7 @@ static volatile bool        is_5s_finished          = false;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 static inline void SD_Set_Freq(PWM_TypeDef *PWMx, uint32_t _Freq);
+static inline void SD_Set_OC(PWM_TypeDef *PWMx, uint32_t OC);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 PWM_TypeDef H_Bridge_1_PWM =
 {
@@ -63,7 +64,7 @@ PWM_TypeDef H_Bridge_1_PWM =
     .Prescaler  =   10,
     .Mode       =   LL_TIM_OCMODE_PWM2,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
-    .Duty       =   1636, //500us
+    .Duty       =   163, //50us
     .Freq       =   0,
 };
 PWM_TypeDef H_Bridge_2_PWM =
@@ -73,7 +74,7 @@ PWM_TypeDef H_Bridge_2_PWM =
     .Prescaler  =   10,
     .Mode       =   LL_TIM_OCMODE_PWM2,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
-    .Duty       =   1636, //500us
+    .Duty       =   163, //50us
     .Freq       =   0,
 };
 
@@ -129,14 +130,6 @@ void H_Bridge_Task(void*)
         LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
         LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
 
-        // TURN OFF LOW AND HIGH FIRST
-        //PWM_Set_Duty(&H_Bridge_1_PWM, 0);
-        //PWM_Set_Duty(&H_Bridge_2_PWM, 0);
-
-        // LOW AND HIGH SIDE GND ON
-        //LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
-        //LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
-
         // DISABLE PWM
         LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
         LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
@@ -145,65 +138,90 @@ void H_Bridge_Task(void*)
 
         if(is_h_bridge_enable == true)
         {
+            // STOP THE CNT AND RESET IT TO 0.
+            LL_TIM_DisableCounter(H_BRIDGE_SD1_HANDLE);
+            PWM_Set_Freq(&H_Bridge_1_PWM, 20000);
+            PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+            LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM2);
+            SD_Set_Freq(&H_Bridge_1_PWM, 1000 / hs_on_time_ms);
+            SD_Set_OC(&H_Bridge_1_PWM, 163);
+
+            //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
+            LL_TIM_ClearFlag_UPDATE(H_BRIDGE_SD1_HANDLE);
+            LL_TIM_EnableIT_UPDATE(H_BRIDGE_SD1_HANDLE);
+            LL_TIM_EnableCounter(H_BRIDGE_SD1_HANDLE);
+
             H_Bridge_State = H_BRIDGE_1_STATE;
         }
         break;
     case H_BRIDGE_1_STATE:
-        if(is_h_bridge_set_up == false)
-        {
-            //PWM_Set_Freq(&H_Bridge_1_PWM, 1000 / hs_on_time_ms);
-            LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM2);
-            LL_TIM_EnableIT_UPDATE(H_BRIDGE_SD1_HANDLE);
-            LL_TIM_DisableUpdateEvent(H_Bridge_1_PWM.TIMx);
-            LL_TIM_EnableUpdateEvent(H_Bridge_1_PWM.TIMx);
-            LL_TIM_GenerateEvent_UPDATE(H_BRIDGE_SD1_HANDLE);
-            is_h_bridge_set_up = true;
-        }
-        else if(is_h_bridge_enable == false)
+        if(is_h_bridge_enable == false)
         {
             H_Bridge_State = H_BRIDGE_STOP_STATE;
         }
         else if(high_side_pulse_count == (high_side_set_pulse_count * 2))
         {
+            high_side_pulse_count = 0;
+            PWM_State = PWM_LOGIC_HIGH_STATE;
+            H_Bridge_State = H_BRDIGE_2_STATE;
+
             // Disable Update Interupt
             LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
 
             // TURN OFF LOW AND HIGH FIRST
             LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
 
-            high_side_pulse_count = 0;
-            is_h_bridge_set_up = false;
-            PWM_State = PWM_LOGIC_HIGH_STATE;
-            H_Bridge_State = H_BRDIGE_2_STATE;
+            // STOP THE CNT AND RESET IT TO 0.
+            LL_TIM_DisableCounter(H_BRIDGE_SD2_HANDLE);
+
+            // CHANGE THE ARR AND SET THE PWM MODE
+            // WHEN CHANGE THE ARR, IT ALSO FIRE THE UG BIT
+            // WHICH RESET THE CNT AND PRESCALE CNT
+            PWM_Set_Freq(&H_Bridge_2_PWM, 20000);
+            PWM_Set_Duty(&H_Bridge_2_PWM, 0);
+            LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_PWM2);
+            SD_Set_Freq(&H_Bridge_2_PWM, 1000 / ls_on_time_ms);
+            SD_Set_OC(&H_Bridge_2_PWM, 163);
+
+            //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
+            LL_TIM_ClearFlag_UPDATE(H_BRIDGE_SD2_HANDLE);
+            LL_TIM_EnableIT_UPDATE(H_BRIDGE_SD2_HANDLE);
+            LL_TIM_EnableCounter(H_BRIDGE_SD2_HANDLE);
         }
         break;
     case H_BRDIGE_2_STATE:
-        if (is_h_bridge_set_up == false)
-        {
-            PWM_Set_Freq(&H_Bridge_2_PWM, 1000 / ls_on_time_ms);
-            LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_PWM2);
-            LL_TIM_EnableIT_UPDATE(H_BRIDGE_SD2_HANDLE);
-            LL_TIM_DisableUpdateEvent(H_Bridge_1_PWM.TIMx);
-            LL_TIM_EnableUpdateEvent(H_Bridge_1_PWM.TIMx);
-            LL_TIM_GenerateEvent_UPDATE(H_BRIDGE_SD2_HANDLE);
-            is_h_bridge_set_up = true;
-        }
-        else if(is_h_bridge_enable == false)
+        if(is_h_bridge_enable == false)
         {
             H_Bridge_State = H_BRIDGE_STOP_STATE;
         }
         else if(low_side_pulse_count == (low_side_set_pulse_count * 2))
         {
+            low_side_pulse_count = 0;
+            PWM_State = PWM_LOGIC_HIGH_STATE;
+            H_Bridge_State = H_BRIDGE_1_STATE;
+
             // Disable Update Interupt
             LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
 
             // TURN OFF LOW AND HIGH FIRST
             LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
 
-            low_side_pulse_count = 0;
-            is_h_bridge_set_up = false;
-            PWM_State = PWM_LOGIC_HIGH_STATE;
-            H_Bridge_State = H_BRIDGE_1_STATE;
+            // STOP THE CNT AND RESET IT TO 0.
+            LL_TIM_DisableCounter(H_BRIDGE_SD1_HANDLE);
+
+            // CHANGE THE ARR AND SET THE PWM MODE
+            // WHEN CHANGE THE ARR, IT ALSO FIRE THE UG BIT
+            // WHICH RESET THE CNT AND PRESCALE CNT
+            PWM_Set_Freq(&H_Bridge_1_PWM, 10000);
+            PWM_Set_Duty(&H_Bridge_1_PWM, 0);
+            LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM2);
+            SD_Set_Freq(&H_Bridge_1_PWM, 1000 / hs_on_time_ms);
+            SD_Set_OC(&H_Bridge_1_PWM, 163);
+
+            //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
+            LL_TIM_ClearFlag_UPDATE(H_BRIDGE_SD1_HANDLE);
+            LL_TIM_EnableIT_UPDATE(H_BRIDGE_SD1_HANDLE);
+            LL_TIM_EnableCounter(H_BRIDGE_SD1_HANDLE);
         }
         break;
 
@@ -273,6 +291,28 @@ static inline void SD_Set_Freq(PWM_TypeDef *PWMx, uint32_t _Freq)
     uint16_t SD_ARR;
     SD_ARR = __LL_TIM_CALC_ARR(APB1_TIMER_CLK, LL_TIM_GetPrescaler(PWMx->TIMx), _Freq);
     LL_TIM_SetAutoReload(PWMx->TIMx, SD_ARR);
+}
+
+static inline void SD_Set_OC(PWM_TypeDef *PWMx, uint32_t OC)
+{
+    switch (PWMx->Channel)
+    {
+    case LL_TIM_CHANNEL_CH1:
+        LL_TIM_OC_SetCompareCH1(PWMx->TIMx, OC);
+        break;
+    case LL_TIM_CHANNEL_CH2:
+        LL_TIM_OC_SetCompareCH2(PWMx->TIMx, OC);
+        break;
+    case LL_TIM_CHANNEL_CH3:
+        LL_TIM_OC_SetCompareCH3(PWMx->TIMx, OC);
+        break;
+    case LL_TIM_CHANNEL_CH4:
+        LL_TIM_OC_SetCompareCH4(PWMx->TIMx, OC);
+        break;
+
+    default:
+        break;
+    }
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
