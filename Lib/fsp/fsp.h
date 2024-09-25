@@ -68,8 +68,8 @@ TSOD (ESC D7) => SOD (7E) TEOF (ESC DE) => EOF (EF) TESC (ESC DB) => ESC (BD)
 #define FSP_CRC16_INITIAL_VALUE         0       /**< CRC16 initial value. */
 
 // Decode states
-#define FSP_PKT_NOT_READY               0       /**< Packet not ready. */
-#define FSP_PKT_READY                   1       /**< Packet ready. */
+#define FSP_PKT_READY                   0       /**< Packet not ready. */
+#define FSP_PKT_NOT_READY               1       /**< Packet ready. */
 #define FSP_PKT_INVALID                 2       /**< Packet invalid. */
 #define FSP_PKT_WRONG_ADR               3       /**< Packet with wrong address. */
 #define FSP_PKT_ERROR                   4       /**< Packet with error. */

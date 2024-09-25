@@ -1,9 +1,7 @@
 // APP HEADER //
 #include "app.h"
 
-//TODO: Create a system to handle hard fault or smth like that.
-
-#define         SCHEDULER_TASK_COUNT  2
+#define         SCHEDULER_TASK_COUNT  3
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
 tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                 {
@@ -15,9 +13,17 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
                     },
                     {
+                            &FSP_Line_Task,
+                            (void *) 0,
+                            10,                         //call every 1ms
+                            0,                          //count from start
+                            true                        //is active
+
+                    },
+                    {
                             &CMD_Line_Task,
                             (void *) 0,
-                            5,                         //call every 1ms
+                            15,                         //call every 1ms
                             0,                          //count from start
                             true                        //is active
                     },
@@ -30,6 +36,7 @@ void App_Main(void)
     SchedulerInit(10000);
 
     H_Bridge_Task_Init();
+    FSP_Line_Task_Init();
     CMD_Line_Task_Init();
 
     while (1)
