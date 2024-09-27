@@ -380,6 +380,10 @@ static void MX_TIM3_Init(void)
   /* Peripheral clock enable */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM3);
 
+  /* TIM3 interrupt Init */
+  NVIC_SetPriority(TIM3_IRQn, 3);
+  NVIC_EnableIRQ(TIM3_IRQn);
+
   /* USER CODE BEGIN TIM3_Init 1 */
 
   /* USER CODE END TIM3_Init 1 */
@@ -567,6 +571,10 @@ static void MX_TIM16_Init(void)
 
   /* Peripheral clock enable */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM16);
+
+  /* TIM16 interrupt Init */
+  NVIC_SetPriority(TIM16_IRQn, 3);
+  NVIC_EnableIRQ(TIM16_IRQn);
 
   /* USER CODE BEGIN TIM16_Init 1 */
 

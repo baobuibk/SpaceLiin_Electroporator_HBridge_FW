@@ -60,14 +60,16 @@ void FSP_Line_Task_Init()
     {
         memset((void *)FSP_line.p_buffer, 0, sizeof(FSP_line.p_buffer));
     }
+
+    fsp_init(FSP_ADR_GPP);
 }
 
 /* :::::::::: CMD Line Task ::::::::::::: */
 bool is_receive_SOD = false;
+bool escape         = false;
 void FSP_Line_Task(void*)
 {
     uint8_t fsp_return, time_out;
-    bool    escape = false;
     fsp_packet_t  fsp_pkt;
 
     for(time_out = 50, escape = false; (!RX_BUFFER_EMPTY(&GPC_UART)) && (time_out != 0) && escape == false; time_out--)
@@ -130,19 +132,19 @@ void GPC_UART_IRQHandler(void)
         // NOTE: On win 10, default PUTTY when hit enter only send back '\r',
         // while on default HERCULES when hit enter send '\r\n' in that order.
         // The code bellow is modified so that it can work on PUTTY and HERCULES.
-        if((!RX_BUFFER_FULL(&GPC_UART)) && (GPC_UART.RX_irq_char != '\n'))
-        {
-            if (GPC_UART.RX_irq_char == '\r')
-            {
-                GPC_UART.p_RX_buffer[GPC_UART.RX_write_index] = '\n';
-                ADVANCE_RX_WRITE_INDEX(&GPC_UART);
-            }
-            else
-            {
+        //if((!RX_BUFFER_FULL(&GPC_UART)) && (GPC_UART.RX_irq_char != '\n'))
+        //{
+            //if (GPC_UART.RX_irq_char == '\r')
+            //{
+                //GPC_UART.p_RX_buffer[GPC_UART.RX_write_index] = '\n';
+                //ADVANCE_RX_WRITE_INDEX(&GPC_UART);
+            //}
+            //else
+            //{
                 GPC_UART.p_RX_buffer[GPC_UART.RX_write_index] = GPC_UART.RX_irq_char;
                 ADVANCE_RX_WRITE_INDEX(&GPC_UART);
-            }
-        }
+            //}
+        //}
     }
 }
 

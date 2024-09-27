@@ -14,13 +14,17 @@
 /* :::::::::: CMD Line Task Init :::::::: */
 int CMD_LINE_TEST(int argc, char *argv[]);
 
-int GPC_PULSE_COUNT(int argc, char *argv[]);
-int GPC_PULSE_HS_DURATION(int argc, char *argv[]);
-int GPC_PULSE_LS_DURATION(int argc, char *argv[]);
-int GPC_PULSE_CONTROL(int argc, char *argv[]);
+int CMD_PULSE_COUNT(int argc, char *argv[]);
+int CMD_PULSE_DELAY(int argc, char *argv[]);
+int CMD_PULSE_HV(int argc, char *argv[]);
+int CMD_PULSE_LV(int argc, char *argv[]);
+int CMD_PULSE_CONTROL(int argc, char *argv[]);
 
-int GPC_CUVETTE_CONTROL(int argc, char *argv[]);
-int GPC_CUVETTE_ELECTRODE(int argc, char *argv[]);
+int CMD_RELAY_SET(int argc, char *argv[]);
+int CMD_RELAY_CONTROL(int argc, char *argv[]);
+
+int CMD_CHANNEL_SET(int argc, char *argv[]);
+int CMD_CHANNEL_CONTROL(int argc, char *argv[]);
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 

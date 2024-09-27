@@ -48,12 +48,15 @@ TSOD (ESC D7) => SOD (7E) TEOF (ESC DE) => EOF (EF) TESC (ESC DB) => ESC (BD)
 #define FSP_PKT_TYPE_CMD_W_DATA_ACK		8
 
 // Commands
-#define FSP_CMD_GPC_PULSE_COUNT         1       /**< Set number of pulse. */
-#define FSP_CMD_GPC_PULSE_HS_DURATION	2       /**< Set hs pulse on time and off time. */
-#define FSP_CMD_GPC_PULSE_LS_DURATION   3       /**< Set ls pulse on time and off time. */
-#define FSP_CMD_GPC_PULSE_CONTROL		4       /**< Start pulsing. */
-#define FSP_CMD_GPC_CUVETTE_ELECTRODE	5       /**< Stop pulsing. */
-#define FSP_CMD_GPC_CUVETTE_CONTROL     6       /**< Stop cuvette. */
+#define FSP_CMD_PULSE_COUNT             1       /**< Set number of pulse. */
+#define FSP_CMD_PULSE_DELAY             2
+#define FSP_CMD_PULSE_HV	            3       /**< Set hs pulse on time and off time. */
+#define FSP_CMD_PULSE_LV                4       /**< Set ls pulse on time and off time. */
+#define FSP_CMD_PULSE_CONTROL		    5       /**< Start pulsing. */
+#define FSP_CMD_RELAY_SET	            6       /**< Stop pulsing. */
+#define FSP_CMD_RELAY_CONTROL           7       /**< Stop cuvette. */
+#define FSP_CMD_CHANNEL_SET             8
+#define FSP_CMD_CHANNEL_CONTROL         9
 
 // Ack answers
 #define FSP_ACK_RF_MUTEX_FREE           1       /**< RF mutex is free. */

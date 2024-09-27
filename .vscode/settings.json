@@ -14,6 +14,8 @@
         "pwm.h": "c",
         "stdint.h": "c",
         "fsp.h": "c",
-        "fsp_line_task.h": "c"
+        "fsp_line_task.h": "c",
+        "board.h": "c",
+        "stm32f0xx_ll_rcc.h": "c"
     }
 }

@@ -10,13 +10,14 @@
 
 #include "board.h"
 #include "h_bridge_task.h"
+#include "v_switch_task.h"
 #include "stm32f0xx_ll_gpio.h"
 
 #include <string.h>
 #include <stdio.h>
 
-static void decode_ls_cuvette(uint8_t cuvette_code);
-static void decode_hs_cuvette(uint8_t cuvette_code);
+static void decode_ls_relay(uint8_t cuvette_code);
+static void decode_hs_relay(uint8_t cuvette_code);
 
 uint8_t fsp_my_adr;
 
@@ -323,26 +324,29 @@ int frame_processing(fsp_packet_t *fsp_pkt){
 		case FSP_PKT_TYPE_CMD_W_DATA:
             switch (fsp_pkt->payload[0])
             {
-            case FSP_CMD_GPC_PULSE_COUNT:
-                high_side_set_pulse_count   = fsp_pkt->payload[1];
-                low_side_set_pulse_count    = fsp_pkt->payload[2];
+            case FSP_CMD_PULSE_COUNT:
+                hv_pulse_count  = fsp_pkt->payload[1];
+                lv_pulse_count  = fsp_pkt->payload[2];
                 break;
-            case FSP_CMD_GPC_PULSE_HS_DURATION:
-                hs_on_time_ms   = fsp_pkt->payload[1];
-                hs_off_time_ms  = fsp_pkt->payload[2];
+            case FSP_CMD_PULSE_DELAY:
+                pulse_delay_ms  =   fsp_pkt->payload[1];
                 break;
-            case FSP_CMD_GPC_PULSE_LS_DURATION:
-                ls_on_time_ms   = fsp_pkt->payload[1];
-                ls_off_time_ms  = fsp_pkt->payload[2];
+            case FSP_CMD_PULSE_HV:
+                hv_on_time_ms   = fsp_pkt->payload[1];
+                hv_off_time_ms  = fsp_pkt->payload[2];
                 break;
-            case FSP_CMD_GPC_PULSE_CONTROL:
+            case FSP_CMD_PULSE_LV:
+                lv_on_time_ms   = fsp_pkt->payload[1];
+                lv_off_time_ms  = fsp_pkt->payload[2];
+                break;
+            case FSP_CMD_PULSE_CONTROL:
                 is_h_bridge_enable = fsp_pkt->payload[1];
                 break;
-            case FSP_CMD_GPC_CUVETTE_ELECTRODE:
-                decode_hs_cuvette(fsp_pkt->payload[1]);
-                decode_ls_cuvette(fsp_pkt->payload[2]);
+            case FSP_CMD_RELAY_SET:
+                decode_hs_relay(fsp_pkt->payload[1]);
+                decode_ls_relay(fsp_pkt->payload[2]);
                 break;
-            case FSP_CMD_GPC_CUVETTE_CONTROL:
+            case FSP_CMD_RELAY_CONTROL:
                 if (fsp_pkt->payload[1] == 0)
                 {
                     LL_GPIO_ResetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
@@ -353,6 +357,12 @@ int frame_processing(fsp_packet_t *fsp_pkt){
                     LL_GPIO_SetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
                     LL_GPIO_SetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
                 }
+                break;
+            case FSP_CMD_CHANNEL_SET:
+                Channel_Set = fsp_pkt->payload[1];
+                break;
+            case FSP_CMD_CHANNEL_CONTROL:
+                is_v_switch_enable = fsp_pkt->payload[1];
                 break;
 
             default:
@@ -382,62 +392,62 @@ int frame_processing(fsp_packet_t *fsp_pkt){
 	return 0;
 }
 
-static void decode_ls_cuvette(uint8_t cuvette_code)
+static void decode_ls_relay(uint8_t cuvette_code)
 {
-    if (cuvette_code & 0b001)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
-    }
-    else
+    if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
     }
-    
-    if (cuvette_code & 0b010)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
-    }
     else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
+    }
+    
+    if ((cuvette_code & 0b010) == 0b010)
     {
         LL_GPIO_SetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
     }
-
-    if (cuvette_code & 0b100)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
-    }
     else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
+    }
+
+    if ((cuvette_code & 0b100) == 0b100)
     {
         LL_GPIO_SetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
     }
+    else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
+    }
 }
 
-static void decode_hs_cuvette(uint8_t cuvette_code)
+static void decode_hs_relay(uint8_t cuvette_code)
 {
-    if (cuvette_code & 0b001)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
-    }
-    else
+    if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
     }
-    
-    if (cuvette_code & 0b010)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
-    }
     else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
+    }
+    
+    if ((cuvette_code & 0b010) == 0b010)
     {
         LL_GPIO_SetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
     }
-
-    if (cuvette_code & 0b100)
+    else
     {
-        LL_GPIO_ResetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
+        LL_GPIO_ResetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
+    }
+
+    if ((cuvette_code & 0b100) == 0b100)
+    {
+        LL_GPIO_SetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
     }
     else
     {
-        LL_GPIO_SetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
+        LL_GPIO_ResetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
     }
 }
