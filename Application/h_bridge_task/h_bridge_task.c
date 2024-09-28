@@ -56,20 +56,20 @@ PWM_TypeDef H_Bridge_1_PWM =
 {
     .TIMx       =   H_BRIDGE_SD1_HANDLE,
     .Channel    =   H_BRIDGE_SD1_CHANNEL,
-    .Prescaler  =   100,
+    .Prescaler  =   300,
     .Mode       =   LL_TIM_OCMODE_PWM2,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
-    .Duty       =   163, //50us
+    .Duty       =   6, //50us
     .Freq       =   0,
 };
 PWM_TypeDef H_Bridge_2_PWM =
 {
     .TIMx       =   H_BRIDGE_SD2_HANDLE,
     .Channel    =   H_BRIDGE_SD2_CHANNEL,
-    .Prescaler  =   100,
+    .Prescaler  =   300,
     .Mode       =   LL_TIM_OCMODE_PWM2,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
-    .Duty       =   163, //50us
+    .Duty       =   6, //50us
     .Freq       =   0,
 };
 
@@ -154,7 +154,7 @@ void H_Bridge_Task(void*)
             PWM_Set_Duty(&H_Bridge_1_PWM, 0);
             LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM2);
             SD_Set_Freq(&H_Bridge_1_PWM, 1000 / pulse_on_time_ms);
-            SD_Set_OC(&H_Bridge_1_PWM, 163);
+            SD_Set_OC(&H_Bridge_1_PWM, 6);
 
             //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
             LL_TIM_ClearFlag_UPDATE(V_SWITCH_LIN1_HANDLE);
@@ -194,7 +194,7 @@ void H_Bridge_Task(void*)
             PWM_Set_Duty(&H_Bridge_2_PWM, 0);
             LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_PWM2);
             SD_Set_Freq(&H_Bridge_2_PWM, 1000 / pulse_on_time_ms);
-            SD_Set_OC(&H_Bridge_2_PWM, 163);
+            SD_Set_OC(&H_Bridge_2_PWM, 6);
 
             //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
             LL_TIM_ClearFlag_UPDATE(H_BRIDGE_SD2_HANDLE);
@@ -244,7 +244,7 @@ void H_Bridge_Task(void*)
             PWM_Set_Duty(&H_Bridge_1_PWM, 0);
             LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_PWM2);
             SD_Set_Freq(&H_Bridge_1_PWM, 1000 / pulse_on_time_ms);
-            SD_Set_OC(&H_Bridge_1_PWM, 163);
+            SD_Set_OC(&H_Bridge_1_PWM, 6);
 
             //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
             LL_TIM_ClearFlag_UPDATE(V_SWITCH_LIN2_HANDLE);
@@ -284,7 +284,7 @@ void H_Bridge_Task(void*)
             PWM_Set_Duty(&H_Bridge_2_PWM, 0);
             LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_PWM2);
             SD_Set_Freq(&H_Bridge_2_PWM, 1000 / pulse_on_time_ms);
-            SD_Set_OC(&H_Bridge_2_PWM, 163);
+            SD_Set_OC(&H_Bridge_2_PWM, 6);
 
             //ENABLE IT UPDATE, ENABLE CNT AND GENERATE EVENT
             LL_TIM_ClearFlag_UPDATE(H_BRIDGE_SD2_HANDLE);
@@ -300,6 +300,7 @@ void H_Bridge_Task(void*)
         }
         else if(pulse_count >= (pulse_set_count * 2))
         {
+            /*
             pulse_set_count     = hv_pulse_count;
             pulse_count         = 0;
             pulse_on_time_ms    = hv_on_time_ms;
@@ -344,6 +345,13 @@ void H_Bridge_Task(void*)
 
             LL_TIM_EnableCounter(V_SWITCH_LIN1_HANDLE);
             LL_TIM_EnableCounter(H_BRIDGE_SD1_HANDLE);
+            */
+        
+            
+            is_h_bridge_enable = false;
+            H_Bridge_State = H_BRIDGE_STOP_STATE;
+            is_h_bridge_off = false;
+            
         }
         break;
 

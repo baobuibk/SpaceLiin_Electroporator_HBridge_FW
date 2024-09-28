@@ -126,9 +126,9 @@ int CMD_PULSE_LV(int argc, char *argv[])
     receive_argm[0] = atoi(argv[1]);
     receive_argm[1] = atoi(argv[2]);
 
-    if ((receive_argm[0] > 20) || (receive_argm[0] < 1))
+    if ((receive_argm[0] > 500) || (receive_argm[0] < 1))
         return CMDLINE_INVALID_ARG;
-    else if ((receive_argm[1] > 20) || (receive_argm[1] < 1))
+    else if ((receive_argm[1] > 500) || (receive_argm[1] < 1))
         return CMDLINE_INVALID_ARG;
 
     lv_on_time_ms = receive_argm[0];
