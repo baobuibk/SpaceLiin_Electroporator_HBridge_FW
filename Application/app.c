@@ -1,5 +1,8 @@
 // APP HEADER //
 #include "app.h"
+#include "stm32f0xx_ll_gpio.h"
+
+static void Status_Led(void*);
 
 #define         SCHEDULER_TASK_COUNT  3
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
@@ -20,10 +23,19 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
 
                     },
+                    /*
                     {
                             &CMD_Line_Task,
                             (void *) 0,
                             15,                         //call every 1ms
+                            0,                          //count from start
+                            true                        //is active
+                    },
+                    */
+                    {
+                            &Status_Led,
+                            (void *) 0,
+                            10000,                      //call every 1ms
                             0,                          //count from start
                             true                        //is active
                     },
@@ -44,4 +56,9 @@ void App_Main(void)
     {
         SchedulerRun();
     }
+}
+
+static void Status_Led(void*)
+{
+    LL_GPIO_TogglePin(DEBUG_LED_PORT, DEBUG_LED_PIN);
 }

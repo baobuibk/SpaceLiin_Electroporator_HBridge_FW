@@ -72,9 +72,10 @@ void FSP_Line_Task(void*)
     uint8_t fsp_return, time_out;
     fsp_packet_t  fsp_pkt;
 
-    for(time_out = 50, escape = false; (!RX_BUFFER_EMPTY(&GPC_UART)) && (time_out != 0) && escape == false; time_out--)
+    for(time_out = 50, escape = false; (!RX_BUFFER_EMPTY(&GPC_UART)) && (time_out != 0) && (escape == false); time_out--)
     {
         FSP_line.RX_char = UART_Get_Char(&GPC_UART);
+        escape = false;
 
         if(FSP_line.RX_char == FSP_PKT_SOD)
         {
