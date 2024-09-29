@@ -77,9 +77,9 @@ void UART_Init( uart_stdio_typedef* p_uart, USART_TypeDef* _handle,
 //! \param pcBuf points to a buffer containing the string to transmit.
 //
 //*****************************************************************************
-void UART_Send_Char(uart_stdio_typedef* p_uart, const char *pcChar)
+void UART_Send_Char(uart_stdio_typedef* p_uart, const char Char)
 {
-	UART_Write(p_uart, pcChar, 1);
+	UART_Write(p_uart, &Char, 1);
 }
 
 //*****************************************************************************

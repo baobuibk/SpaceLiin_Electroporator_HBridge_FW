@@ -108,11 +108,11 @@ void CMD_Line_Task(void*)
                 break;
 
             CMD_line.write_index--;
-            UART_Send_Char(&RS232_UART, &CMD_line.RX_char);
+            UART_Send_Char(&RS232_UART, CMD_line.RX_char);
             break;
         }
 
-        UART_Send_Char(&RS232_UART, &CMD_line.RX_char);
+        UART_Send_Char(&RS232_UART, CMD_line.RX_char);
 
         if((CMD_line.RX_char == '\r') || (CMD_line.RX_char == '\n'))
         {
