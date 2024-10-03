@@ -47,6 +47,7 @@ bool is_v_switch_enable = false;
 /* :::::::::: V_Switch Task Init :::::::: */
 void V_Switch_Task_Init(void)
 {
+
     // V SWITCH 1 INIT
     LL_GPIO_ResetOutputPin(V_SWITCH_HIN1_PORT, V_SWITCH_HIN1_PIN);
     PWM_Init(&V_Switch_1_PWM);

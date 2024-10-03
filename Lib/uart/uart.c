@@ -798,3 +798,54 @@ void UART_Prime_Transmit(uart_stdio_typedef* p_uart)
         NVIC_EnableIRQ(p_uart->irqn);
     }
 }
+
+
+uint16_t UART_FSP(uart_stdio_typedef* p_uart, const char *pcBuf, uint16_t ui16Len)
+{
+
+    uint8_t uIdx;
+
+    //
+    // Check for valid arguments.
+    //
+    //
+    // Send the characters
+    //
+    for(uIdx = 0; uIdx < ui16Len; uIdx++)
+    {
+        if(!TX_BUFFER_FULL(p_uart))
+        {
+        	p_uart->p_TX_buffer[p_uart->TX_write_index] = pcBuf[uIdx];
+            ADVANCE_TX_WRITE_INDEX(p_uart);
+        }
+        else
+        {
+            //
+            // Buffer is full - discard remaining characters and return.
+            //
+            p_uart->p_TX_buffer[p_uart->TX_write_index] = '\r';
+            break;
+        }
+    }
+
+    //
+    // If the usart txe irq is disable, this mean an usart phase is finished
+    // we need to enable the txe irq and kick start the transmit process.
+    //
+    if (LL_USART_IsEnabledIT_TXE(p_uart->handle) == false)
+    {
+        // NOTE: Turn on TXE after prime transmit,
+        // if turn on TXE b4 prime transmit create a
+        // bug where the index = 2 char don't get
+        // send.
+
+        //LL_USART_EnableIT_TXE(p_uart->handle);
+        UART_Prime_Transmit(p_uart);
+        LL_USART_EnableIT_TXE(p_uart->handle);
+    }
+
+    //
+    // Return the number of characters written.
+    //
+    return(uIdx);
+}

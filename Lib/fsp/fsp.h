@@ -47,17 +47,6 @@ TSOD (ESC D7) => SOD (7E) TEOF (ESC DE) => EOF (EF) TESC (ESC DB) => ESC (BD)
 #define FSP_PKT_TYPE_CMD_W_DATA     	7
 #define FSP_PKT_TYPE_CMD_W_DATA_ACK		8
 
-// Commands
-#define FSP_CMD_PULSE_COUNT             1       /**< Set number of pulse. */
-#define FSP_CMD_PULSE_DELAY             2
-#define FSP_CMD_PULSE_HV	            3       /**< Set hs pulse on time and off time. */
-#define FSP_CMD_PULSE_LV                4       /**< Set ls pulse on time and off time. */
-#define FSP_CMD_PULSE_CONTROL		    5       /**< Start pulsing. */
-#define FSP_CMD_RELAY_SET	            6       /**< Stop pulsing. */
-#define FSP_CMD_RELAY_CONTROL           7       /**< Stop cuvette. */
-#define FSP_CMD_CHANNEL_SET             8
-#define FSP_CMD_CHANNEL_CONTROL         9
-
 // Ack answers
 #define FSP_ACK_RF_MUTEX_FREE           1       /**< RF mutex is free. */
 #define FSP_ACK_RF_MUTEX_BUSY           2       /**< RF mutex is busy. */
@@ -99,6 +88,7 @@ typedef struct
     uint8_t type;                               /**< Type of packet. */
     uint8_t payload[FSP_PAYLOAD_MAX_LENGTH];    /**< Payload of the packet. */
     uint16_t crc16;                             /**< CRC16-CCITT bytes. */
+    uint8_t eof;
 } fsp_packet_t;
 
 /**
@@ -225,5 +215,4 @@ void fsp_encode(fsp_packet_t *fsp, uint8_t *pkt, uint8_t *pkt_len);
 uint8_t fsp_decode(uint8_t byte, fsp_packet_t *fsp);
 void frame_encode(fsp_packet_t *fsp, uint8_t *frame, uint8_t *frame_len);
 int frame_decode(uint8_t *buffer, uint8_t length, fsp_packet_t *pkt);
-int frame_processing(fsp_packet_t *fsp_pkt);
 #endif /* LIBFSP_FSP_H_ */

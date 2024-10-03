@@ -21,8 +21,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static void decode_ls_relay(uint8_t cuvette_code);
-static void decode_hs_relay(uint8_t cuvette_code);
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern uart_stdio_typedef  RS232_UART;
 extern uart_stdio_typedef  GPP_UART;
@@ -248,7 +247,7 @@ int CMD_CHANNEL_CONTROL(int argc, char *argv[])
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static void decode_ls_relay(uint8_t cuvette_code)
+void decode_ls_relay(uint8_t cuvette_code)
 {
     if ((cuvette_code & 0b001) == 0b001)
     {
@@ -278,7 +277,7 @@ static void decode_ls_relay(uint8_t cuvette_code)
     }
 }
 
-static void decode_hs_relay(uint8_t cuvette_code)
+void decode_hs_relay(uint8_t cuvette_code)
 {
     if ((cuvette_code & 0b001) == 0b001)
     {

@@ -89,8 +89,7 @@ uint8_t     lv_off_time_ms              = 1;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: H Bridge Task Init :::::::: */
 void H_Bridge_Task_Init(void)
-{
-    // H bridge 1 init
+{     // H bridge 1 init
     PWM_Init(&H_Bridge_1_PWM);
     PWM_Disable(&H_Bridge_1_PWM);
     LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);

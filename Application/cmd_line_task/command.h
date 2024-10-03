@@ -26,6 +26,9 @@ int CMD_RELAY_CONTROL(int argc, char *argv[]);
 int CMD_CHANNEL_SET(int argc, char *argv[]);
 int CMD_CHANNEL_CONTROL(int argc, char *argv[]);
 
+void decode_ls_relay(uint8_t cuvette_code);
+void decode_hs_relay(uint8_t cuvette_code);
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #endif /* COMMAND_H_ */

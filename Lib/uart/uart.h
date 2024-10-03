@@ -34,6 +34,7 @@ void        UART_Send_Char(uart_stdio_typedef* p_uart, const char Char);
 void        UART_Send_String(uart_stdio_typedef* p_uart, const char *pcBuf);
 uint16_t    UART_Write(uart_stdio_typedef* p_uart, const char *pcBuf, uint16_t ui16Len);
 void        UART_Printf(uart_stdio_typedef* p_uart, const char *pc_string, ...);
+uint16_t    UART_FSP(uart_stdio_typedef* p_uart, const char *pcBuf, uint16_t ui16Len);
 char        UART_Get_Char(uart_stdio_typedef* p_uart);
 
 uint8_t     UART_is_buffer_full(volatile uint16_t *pui16Read,

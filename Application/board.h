@@ -18,6 +18,7 @@
 
 #define I_SENSE_RESET_PORT      GPIOC
 #define I_SENSE_RESET_PIN       LL_GPIO_PIN_14
+#define ADC_CHANNEL_COUNT		1
 /***********************************************/
 
 /*********************H BRIDGE******************/
@@ -105,5 +106,9 @@
 #define DECOD_HS_EN_PORT        GPIOA
 #define DECOD_HS_EN_PIN         LL_GPIO_PIN_8
 /***********************************************/
+
+#define GPC_TX_BUF_LEN			64
+#define	GPC_RX_BUF_LEN			64
+#define FSP_BUF_LEN				64
 
 #endif /* BOARD_H_ */

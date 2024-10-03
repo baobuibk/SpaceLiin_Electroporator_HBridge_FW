@@ -155,7 +155,7 @@ void SystemInit(void)
   *             or HSI_VALUE(*) multiplied/divided by the PLL factors.
   *
   *           - If SYSCLK source is HSI48, SystemCoreClock will contain the HSI48_VALUE(***)
-  *
+  *`
   *         (*) HSI_VALUE is a constant defined in stm32f0xx_hal_conf.h file (default value
   *             8 MHz) but the real value may vary depending on the variations
   *             in voltage and temperature.
