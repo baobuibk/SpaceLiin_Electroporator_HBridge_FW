@@ -140,7 +140,7 @@ void SysTick_Handler(void) {
  */
 void ADC1_IRQHandler(void) {
 	/* USER CODE BEGIN ADC1_IRQn 0 */
-	ADC_Task_IRQHandler();
+	I_SENSE_ADC_IRQHandler();
 	/* USER CODE END ADC1_IRQn 0 */
 	/* USER CODE BEGIN ADC1_IRQn 1 */
 

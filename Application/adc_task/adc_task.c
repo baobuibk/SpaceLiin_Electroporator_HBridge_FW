@@ -40,6 +40,8 @@ static inline void V_Switch_Set_Duty(PWM_TypeDef *PWMx, uint32_t _Duty);
 extern uart_stdio_typedef GPC_UART;
 
 extern PWM_TypeDef V_Switch_1_PWM;
+extern PWM_TypeDef H_Bridge_1_PWM;
+extern PWM_TypeDef H_Bridge_2_PWM;
 
 //uint16_t g_Feedback_Current_buffer[3072];
 
@@ -47,7 +49,7 @@ extern PWM_TypeDef V_Switch_1_PWM;
 
 bool        is_impedance_task_enable = false;
 uint16_t    Impedance_Measure_Period = 1000;
-float       Impedance_Current_Average    = 0.0;
+uint16_t    Impedance_Current_Average    = 0.0;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: ADC Task Init :::::::: */
 void ADC_Task_Init(uint32_t Sampling_Time)
@@ -124,12 +126,28 @@ void Impedance_Task(void*)
             Impedance_Current_Average   = 0.0;
             Impedance_Measure_Count     = 0;
             Impedance_State = IMPEDANCE_MEASURE_STATE;
+
+            LL_GPIO_ResetOutputPin(V_SWITCH_HIN1_PORT, V_SWITCH_HIN1_PIN);
+            LL_TIM_OC_SetMode(V_SWITCH_LIN1_HANDLE, V_SWITCH_LIN1_CHANNEL, LL_TIM_OCMODE_PWM1);
+
+            LL_GPIO_ResetOutputPin(V_SWITCH_HIN2_PORT, V_SWITCH_HIN2_PIN);
+            LL_TIM_OC_SetMode(V_SWITCH_LIN2_HANDLE, V_SWITCH_LIN2_CHANNEL, LL_TIM_OCMODE_PWM1);
+
+            // Disable Update Interupt
+            LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
+
+            // DISABLE PWM
+            LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
+            LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
+
+            SchedulerTaskDisable(3);
         }
         else if (is_ADC_read_completed == true)
         {
             is_ADC_read_completed = false;
             ADC_Value = LL_ADC_REG_ReadConversionData12(ADC_I_SENSE_HANDLE);
-            Impedance_Current_Average += (__LL_ADC_CALC_DATA_TO_VOLTAGE(11000, ADC_Value, LL_ADC_RESOLUTION_12B) / (float)Impedance_Measure_Period);
+            Impedance_Current_Average += (__LL_ADC_CALC_DATA_TO_VOLTAGE(11000, ADC_Value, LL_ADC_RESOLUTION_12B) / Impedance_Measure_Period);
             LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
         }
         else if (Impedance_Measure_Count >= Impedance_Measure_Period)
@@ -153,6 +171,22 @@ void Impedance_Task(void*)
             Impedance_Current_Average   = 0.0;
             Impedance_Measure_Count     = 0;
             Impedance_State = IMPEDANCE_MEASURE_STATE;
+
+            LL_GPIO_ResetOutputPin(V_SWITCH_HIN1_PORT, V_SWITCH_HIN1_PIN);
+            LL_TIM_OC_SetMode(V_SWITCH_LIN1_HANDLE, V_SWITCH_LIN1_CHANNEL, LL_TIM_OCMODE_PWM1);
+
+            LL_GPIO_ResetOutputPin(V_SWITCH_HIN2_PORT, V_SWITCH_HIN2_PIN);
+            LL_TIM_OC_SetMode(V_SWITCH_LIN2_HANDLE, V_SWITCH_LIN2_CHANNEL, LL_TIM_OCMODE_PWM1);
+
+            // Disable Update Interupt
+            LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_2_PWM.TIMx);
+
+            // DISABLE PWM
+            LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
+            LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
+
+            SchedulerTaskDisable(3);
         }
         break;
 

@@ -4,7 +4,7 @@
 
 static void Status_Led(void*);
 
-#define         SCHEDULER_TASK_COUNT  4
+#define         SCHEDULER_TASK_COUNT  5
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
 tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                 {
@@ -26,14 +26,14 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                     {
                             &ADC_Task,
                             (void *) 0,
-                            10,                      //call every 1ms
+                            10,                         //call every 1ms
                             0,                          //count from start
                             false                       //is active
                     },
                     {
                             &Impedance_Task,
                             (void *) 0,
-                            10,                      //call every 1ms
+                            10,                         //call every 1ms
                             0,                          //count from start
                             false                       //is active
                     },
