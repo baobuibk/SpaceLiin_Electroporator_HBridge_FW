@@ -12,6 +12,10 @@
         "command.h": "c",
         "stm32f0xx_ll_tim.h": "c",
         "pwm.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "fsp.h": "c",
+        "fsp_line_task.h": "c",
+        "board.h": "c",
+        "stm32f0xx_ll_rcc.h": "c"
     }
 }

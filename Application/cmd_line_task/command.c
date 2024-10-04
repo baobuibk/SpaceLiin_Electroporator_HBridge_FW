@@ -21,8 +21,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Private Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static void decode_ls_cuvette(uint8_t cuvette_code);
-static void decode_hs_cuvette(uint8_t cuvette_code);
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern uart_stdio_typedef  RS232_UART;
 extern uart_stdio_typedef  GPP_UART;
@@ -32,13 +31,16 @@ extern PWM_TypeDef H_Bridge_2_PWM;
 
 tCmdLineEntry g_psCmdTable[] =
 {
-    { "MARCO",                  CMD_LINE_TEST,          "TEST" },
-    { "GPC_PULSE_COUNT",        GPC_PULSE_COUNT,        "Set number of pulse" },
-    { "GPC_PULSE_HS_DURATION",  GPC_PULSE_HS_DURATION,  "Set hs pulse on time and off time" },
-    { "GPC_PULSE_LS_DURATION",  GPC_PULSE_LS_DURATION,  "Set ls pulse on time and off time" },
-    { "GPC_PULSE_CONTROL",      GPC_PULSE_CONTROL,      "Start pulsing" },
-    { "GPC_CUVETTE_ELECTRODE",  GPC_CUVETTE_ELECTRODE,  "Set up cuvette" },
-    { "GPC_CUVETTE_CONTROL",    GPC_CUVETTE_CONTROL,    "Stop cuvette" },
+    { "MARCO",              CMD_LINE_TEST,      "TEST" },
+    { "PULSE_COUNT",        CMD_PULSE_COUNT,    "Set number of pulse" },
+    { "PULSE_DELAY",        CMD_PULSE_DELAY,    "Set delay between pulse hv and lv"},
+    { "PULSE_HV",           CMD_PULSE_HV,       "Set hs pulse on time and off time" },
+    { "PULSE_LV",           CMD_PULSE_LV,       "Set ls pulse on time and off time" },
+    { "PULSE_CONTROL",      CMD_PULSE_CONTROL,  "Start pulsing" },
+    { "RELAY_SET",          CMD_RELAY_SET,      "Set up cuvette" },
+    { "RELAY_CONTROL",      CMD_RELAY_CONTROL,  "Stop cuvette" },
+    { "CHANNEL_SET",        CMD_CHANNEL_SET,    "Choose a cap channel"},
+    { "CHANNEL_CONTROL",    CMD_CHANNEL_CONTROL,"Control the setted channel"},
 	{0,0,0}
 };
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -48,7 +50,7 @@ int CMD_LINE_TEST(int argc, char *argv[])
     return CMDLINE_OK;
 }
 
-int GPC_PULSE_COUNT(int argc, char *argv[])
+int CMD_PULSE_COUNT(int argc, char *argv[])
 {
     if (argc < 3)
         return CMDLINE_TOO_FEW_ARGS;
@@ -63,13 +65,32 @@ int GPC_PULSE_COUNT(int argc, char *argv[])
     if ((receive_argm[0] > 20) || (receive_argm[1] > 20))
         return CMDLINE_INVALID_ARG;
 
-    high_side_set_pulse_count   = receive_argm[0];
-    low_side_set_pulse_count    = receive_argm[1];
+    hv_pulse_count   = receive_argm[0];
+    lv_pulse_count    = receive_argm[1];
 
     return CMDLINE_OK;
 }
 
-int GPC_PULSE_HS_DURATION(int argc, char *argv[])
+int CMD_PULSE_DELAY(int argc, char *argv[])
+{
+    if (argc < 2)
+        return CMDLINE_TOO_FEW_ARGS;
+    else if (argc > 2)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    int receive_argm;
+
+    receive_argm = atoi(argv[1]);
+
+    if ((receive_argm > 127) || (receive_argm < 2))
+        return CMDLINE_INVALID_ARG;
+
+    pulse_delay_ms = receive_argm;
+
+    return CMDLINE_OK;
+}
+
+int CMD_PULSE_HV(int argc, char *argv[])
 {
     if (argc < 3)
         return CMDLINE_TOO_FEW_ARGS;
@@ -86,18 +107,13 @@ int GPC_PULSE_HS_DURATION(int argc, char *argv[])
     else if ((receive_argm[1] > 20) || (receive_argm[1] < 1))
         return CMDLINE_INVALID_ARG;
 
-    hs_on_time_ms = receive_argm[0];
-    hs_off_time_ms = receive_argm[1];
+    hv_on_time_ms = receive_argm[0];
+    hv_off_time_ms = receive_argm[1];
 
-    //hs_duty = (hs_on_time_ms * 100) / (hs_on_time_ms + hs_off_time_ms);
-    //hs_freq = 1000 / (hs_on_time_ms + hs_off_time_ms);
-
-    //PWM_Set_Freq(&H_Bridge_1_PWM, hs_freq);
-    //PWM_Set_Duty(&H_Bridge_1_PWM, hs_duty);
     return CMDLINE_OK;
 }
 
-int GPC_PULSE_LS_DURATION(int argc, char *argv[])
+int CMD_PULSE_LV(int argc, char *argv[])
 {
     if (argc < 3)
         return CMDLINE_TOO_FEW_ARGS;
@@ -109,24 +125,18 @@ int GPC_PULSE_LS_DURATION(int argc, char *argv[])
     receive_argm[0] = atoi(argv[1]);
     receive_argm[1] = atoi(argv[2]);
 
-    if ((receive_argm[0] > 20) || (receive_argm[0] < 1))
+    if ((receive_argm[0] > 500) || (receive_argm[0] < 1))
         return CMDLINE_INVALID_ARG;
-    else if ((receive_argm[1] > 20) || (receive_argm[1] < 1))
+    else if ((receive_argm[1] > 500) || (receive_argm[1] < 1))
         return CMDLINE_INVALID_ARG;
 
-    ls_on_time_ms = receive_argm[0];
-    ls_off_time_ms = receive_argm[1];
-
-    //ls_duty = (receive_argm[0] * 100) / (receive_argm[0] + receive_argm[1]);
-    //ls_freq = 1000 / (receive_argm[0] + receive_argm[1]);
-
-    //PWM_Set_Freq(&H_Bridge_2_PWM, hs_freq);
-    //PWM_Set_Duty(&H_Bridge_2_PWM, hs_duty);
+    lv_on_time_ms = receive_argm[0];
+    lv_off_time_ms = receive_argm[1];
 
     return CMDLINE_OK;
 }
 
-int GPC_PULSE_CONTROL(int argc, char *argv[])
+int CMD_PULSE_CONTROL(int argc, char *argv[])
 {
     if (argc < 2)
         return CMDLINE_TOO_FEW_ARGS;
@@ -145,7 +155,7 @@ int GPC_PULSE_CONTROL(int argc, char *argv[])
     return CMDLINE_OK;
 }
 
-int GPC_CUVETTE_ELECTRODE(int argc, char *argv[])
+int CMD_RELAY_SET(int argc, char *argv[])
 {
     if (argc < 3)
         return CMDLINE_TOO_FEW_ARGS;
@@ -157,18 +167,20 @@ int GPC_CUVETTE_ELECTRODE(int argc, char *argv[])
     receive_argm[0] = atoi(argv[1]);
     receive_argm[1] = atoi(argv[2]);
 
-    if ((receive_argm[0] > 7) || (receive_argm[0] < 0))
+    if (receive_argm[0] == receive_argm[1])
+        return CMDLINE_INVALID_ARG;
+    else if ((receive_argm[0] > 7) || (receive_argm[0] < 0))
         return CMDLINE_INVALID_ARG;
     else if ((receive_argm[1] > 7) || (receive_argm[1] < 0))
         return CMDLINE_INVALID_ARG;
 
-    decode_hs_cuvette(receive_argm[0]);
-    decode_ls_cuvette(receive_argm[1]);
+    decode_hs_relay(receive_argm[0]);
+    decode_ls_relay(receive_argm[1]);
 
     return CMDLINE_OK;
 }
 
-int GPC_CUVETTE_CONTROL(int argc, char *argv[])
+int CMD_RELAY_CONTROL(int argc, char *argv[])
 {
     if (argc < 2)
         return CMDLINE_TOO_FEW_ARGS;
@@ -196,63 +208,101 @@ int GPC_CUVETTE_CONTROL(int argc, char *argv[])
     return CMDLINE_OK;
 }
 
-/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static void decode_ls_cuvette(uint8_t cuvette_code)
+int CMD_CHANNEL_SET(int argc, char *argv[])
 {
-    if (cuvette_code & 0b001)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
-    }
-    else
+    if (argc < 2)
+        return CMDLINE_TOO_FEW_ARGS;
+    else if (argc > 2)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    int receive_argm;
+
+    receive_argm = atoi(argv[1]);
+
+    if ((receive_argm > 2) || (receive_argm < 1))
+        return CMDLINE_INVALID_ARG;
+
+    Channel_Set = receive_argm;
+
+    return CMDLINE_OK;
+}
+
+int CMD_CHANNEL_CONTROL(int argc, char *argv[])
+{
+    if (argc < 2)
+        return CMDLINE_TOO_FEW_ARGS;
+    else if (argc > 2)
+        return CMDLINE_TOO_MANY_ARGS;
+
+    int receive_argm;
+
+    receive_argm = atoi(argv[1]);
+
+    if ((receive_argm > 1) || (receive_argm < 0))
+        return CMDLINE_INVALID_ARG;
+
+    is_v_switch_enable = receive_argm;
+
+    return CMDLINE_OK;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+void decode_ls_relay(uint8_t cuvette_code)
+{
+    if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
     }
-    
-    if (cuvette_code & 0b010)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
-    }
     else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
+    }
+    
+    if ((cuvette_code & 0b010) == 0b010)
     {
         LL_GPIO_SetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
     }
-
-    if (cuvette_code & 0b100)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
-    }
     else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS1_PORT, DECOD_LS1_PIN);
+    }
+
+    if ((cuvette_code & 0b100) == 0b100)
     {
         LL_GPIO_SetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
     }
+    else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_LS2_PORT, DECOD_LS2_PIN);
+    }
 }
 
-static void decode_hs_cuvette(uint8_t cuvette_code)
+void decode_hs_relay(uint8_t cuvette_code)
 {
-    if (cuvette_code & 0b001)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
-    }
-    else
+    if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
     }
-    
-    if (cuvette_code & 0b010)
-    {
-        LL_GPIO_ResetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
-    }
     else
+    {
+        LL_GPIO_ResetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);
+    }
+    
+    if ((cuvette_code & 0b010) == 0b010)
     {
         LL_GPIO_SetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
     }
-
-    if (cuvette_code & 0b100)
+    else
     {
-        LL_GPIO_ResetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
+        LL_GPIO_ResetOutputPin(DECOD_HS1_PORT, DECOD_HS1_PIN);
+    }
+
+    if ((cuvette_code & 0b100) == 0b100)
+    {
+        LL_GPIO_SetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
     }
     else
     {
-        LL_GPIO_SetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
+        LL_GPIO_ResetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
     }
 }

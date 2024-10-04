@@ -47,14 +47,6 @@ TSOD (ESC D7) => SOD (7E) TEOF (ESC DE) => EOF (EF) TESC (ESC DB) => ESC (BD)
 #define FSP_PKT_TYPE_CMD_W_DATA     	7
 #define FSP_PKT_TYPE_CMD_W_DATA_ACK		8
 
-// Commands
-#define FSP_CMD_GPC_PULSE_COUNT         1       /**< Set number of pulse. */
-#define FSP_CMD_GPC_PULSE_HS_DURATION	2       /**< Set hs pulse on time and off time. */
-#define FSP_CMD_GPC_PULSE_LS_DURATION   3       /**< Set ls pulse on time and off time. */
-#define FSP_CMD_GPC_PULSE_CONTROL		4       /**< Start pulsing. */
-#define FSP_CMD_GPC_CUVETTE_ELECTRODE	5       /**< Stop pulsing. */
-#define FSP_CMD_GPC_CUVETTE_CONTROL     6       /**< Stop cuvette. */
-
 // Ack answers
 #define FSP_ACK_RF_MUTEX_FREE           1       /**< RF mutex is free. */
 #define FSP_ACK_RF_MUTEX_BUSY           2       /**< RF mutex is busy. */
@@ -68,8 +60,8 @@ TSOD (ESC D7) => SOD (7E) TEOF (ESC DE) => EOF (EF) TESC (ESC DB) => ESC (BD)
 #define FSP_CRC16_INITIAL_VALUE         0       /**< CRC16 initial value. */
 
 // Decode states
-#define FSP_PKT_NOT_READY               0       /**< Packet not ready. */
-#define FSP_PKT_READY                   1       /**< Packet ready. */
+#define FSP_PKT_READY                   0       /**< Packet not ready. */
+#define FSP_PKT_NOT_READY               1       /**< Packet ready. */
 #define FSP_PKT_INVALID                 2       /**< Packet invalid. */
 #define FSP_PKT_WRONG_ADR               3       /**< Packet with wrong address. */
 #define FSP_PKT_ERROR                   4       /**< Packet with error. */
@@ -96,6 +88,7 @@ typedef struct
     uint8_t type;                               /**< Type of packet. */
     uint8_t payload[FSP_PAYLOAD_MAX_LENGTH];    /**< Payload of the packet. */
     uint16_t crc16;                             /**< CRC16-CCITT bytes. */
+    uint8_t eof;
 } fsp_packet_t;
 
 /**
@@ -222,5 +215,4 @@ void fsp_encode(fsp_packet_t *fsp, uint8_t *pkt, uint8_t *pkt_len);
 uint8_t fsp_decode(uint8_t byte, fsp_packet_t *fsp);
 void frame_encode(fsp_packet_t *fsp, uint8_t *frame, uint8_t *frame_len);
 int frame_decode(uint8_t *buffer, uint8_t length, fsp_packet_t *pkt);
-int frame_processing(fsp_packet_t *fsp_pkt);
 #endif /* LIBFSP_FSP_H_ */

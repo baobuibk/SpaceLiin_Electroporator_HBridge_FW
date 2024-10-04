@@ -1,11 +1,10 @@
 // APP HEADER //
 #include "app.h"
+#include "stm32f0xx_ll_gpio.h"
 
-//TODO: Create a system to handle hard fault or smth like that.
+static void Status_Led(void*);
 
-#define         SCHEDULER_TASK_COUNT  3
-
-uint8_t read_uncompensated_value(uint32_t *pressure, uint32_t *temperature);
+#define         SCHEDULER_TASK_COUNT  4
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
 tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                 {
@@ -17,9 +16,34 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
                     },
                     {
-                            &CMD_Line_Task,
+                            &FSP_Line_Task,
                             (void *) 0,
-                            5,                         //call every 1ms
+                            20,                         //call every 1ms
+                            0,                          //count from start
+                            true                        //is active
+
+                    },
+
+//                    {
+//                            &CMD_Line_Task,
+//                            (void *) 0,
+//                            15,                         //call every 1ms
+//                            0,                          //count from start
+//                            true                        //is active
+//                    },
+
+                    {
+                            &Status_Led,
+                            (void *) 0,
+                            10000,                      //call every 1ms
+                            0,                          //count from start
+                            true                        //is active
+                    },
+
+                    {
+                            &ADC_Task,
+                            (void *) 0,
+                            200,                        //call every 1ms
                             0,                          //count from start
                             true                        //is active
                     },
@@ -38,7 +62,10 @@ void App_Main(void)
     // can run scheduler tick max @ 100us.
     SchedulerInit(10000);
 
+    ADC_Task_Init(LL_ADC_SAMPLINGTIME_7CYCLES_5);
     H_Bridge_Task_Init();
+    V_Switch_Task_Init();
+    FSP_Line_Task_Init();
     CMD_Line_Task_Init();
     BMP390_init();
 
@@ -49,9 +76,7 @@ void App_Main(void)
     }
 }
 
-
-
-
-
-
-
+static void Status_Led(void*)
+{
+    LL_GPIO_TogglePin(DEBUG_LED_PORT, DEBUG_LED_PIN);
+}

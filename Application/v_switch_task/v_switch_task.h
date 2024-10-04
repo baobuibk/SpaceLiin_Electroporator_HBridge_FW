@@ -1,5 +1,5 @@
-#ifndef H_TASK_H_
-#define H_TASK_H_
+#ifndef V_SWITCH_TASK_H_
+#define V_SWITCH_TASK_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdint.h>
@@ -7,34 +7,31 @@
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+typedef enum
+{
+    V_SWITCH_STOP_STATE,
+    V_SWITCH_C1_STATE,
+    V_SWITCH_C2_STATE,
+} V_Switch_state_typdef;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-extern bool                     is_h_bridge_enable;
-
-extern uint8_t                  pulse_delay_ms;
-
-extern uint8_t                  hv_pulse_count;
-extern uint8_t                  hv_on_time_ms;
-extern uint8_t                  hv_off_time_ms;
-
-extern uint8_t                  lv_pulse_count;
-extern uint8_t                  lv_on_time_ms;
-extern uint8_t                  lv_off_time_ms;
+extern V_Switch_state_typdef Channel_Set;
+extern bool is_v_switch_enable;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* :::::::::: H Bridge Task Init :::::::: */
-void H_Bridge_Task_Init(void);
+/* :::::::::: V_Switch Task Init :::::::: */
+void V_Switch_Task_Init(void);
 
-/* :::::::::: H Bridge Task ::::::::::::: */
-void H_Bridge_Task(void*);
+/* :::::::::: V_Switch Task ::::::::::::: */
+void V_Switch_Task(void*);
 
-/* ::::H_Bridge High Side Interupt Handle:::: */
-void H_Bridge_1_Interupt_Handle();
+/* ::::V_Switch 1 Interupt Handle:::: */
+void V_Switch_1_Interupt_Handle();
 
-/* ::::H_Bridge Low Side Interupt Handle:::: */
-void H_Bridge_2_Interupt_Handle();
+/* ::::V_Switch 2 Interupt Handle:::: */
+void V_Switch_2_Interupt_Handle();
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#endif /* H_TASK_H_ */
+#endif /* V_SWITCH_TASK_H_ */

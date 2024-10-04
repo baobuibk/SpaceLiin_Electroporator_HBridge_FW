@@ -25,17 +25,6 @@ struct _cmd_line_typedef
 };
 typedef struct _cmd_line_typedef cmd_line_typedef;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-uart_stdio_typedef  RS232_UART;
-char                g_RS232_UART_TX_buffer[2048];
-char                g_RS232_UART_RX_buffer[64];
-
-uart_stdio_typedef  GPC_UART;
-char                g_GPC_UART_TX_buffer[64];
-char                g_GPC_UART_RX_buffer[64];
-
-cmd_line_typedef    CMD_line;
-char                g_CMD_line_buffer[64];
-
 static const char * ErrorCode[6] =
 {
     "OK\n",
@@ -46,6 +35,7 @@ static const char * ErrorCode[6] =
     "CMDLINE_INVALID_CMD\n",
 };
 
+/*
 const char SPLASH[][65] = 
 {
 {"\r\n"},
@@ -69,22 +59,24 @@ const char SPLASH[][65] =
 {".........................................................\r\n"},
 {".........................................................\r\n"},                                                   
 };
+*/
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-static void         CMD_send_splash(uart_stdio_typedef* p_uart);
+//static void         CMD_send_splash(uart_stdio_typedef* p_uart);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+uart_stdio_typedef  RS232_UART;
+char                g_RS232_UART_TX_buffer[64];
+char                g_RS232_UART_RX_buffer[64];
+
+cmd_line_typedef    CMD_line;
+char                g_CMD_line_buffer[64];
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: CMD Line Task Init :::::::: */
 void CMD_Line_Task_Init()
 {
-
     UART_Init(  &RS232_UART, RS232_UART_HANDLE, RS232_UART_IRQ,
                 g_RS232_UART_TX_buffer, g_RS232_UART_RX_buffer,
                 sizeof(g_RS232_UART_TX_buffer), sizeof(g_RS232_UART_RX_buffer));
-
-    UART_Init(  &GPC_UART, GPC_UART_HANDLE, GPC_UART_IRQ,
-                g_GPC_UART_TX_buffer, g_GPC_UART_RX_buffer,
-                sizeof(g_GPC_UART_TX_buffer), sizeof(g_GPC_UART_RX_buffer));
     
     CMD_line.p_buffer       = g_CMD_line_buffer;
     CMD_line.buffer_size    = 64;
@@ -115,11 +107,11 @@ void CMD_Line_Task(void*)
                 break;
 
             CMD_line.write_index--;
-            UART_Send_Char(&RS232_UART, &CMD_line.RX_char);
+            UART_Send_Char(&RS232_UART, CMD_line.RX_char);
             break;
         }
 
-        UART_Send_Char(&RS232_UART, &CMD_line.RX_char);
+        UART_Send_Char(&RS232_UART, CMD_line.RX_char);
 
         if((CMD_line.RX_char == '\r') || (CMD_line.RX_char == '\n'))
         {
@@ -200,43 +192,15 @@ void RS232_IRQHandler(void)
     }
 }
 
-void GPC_UART_IRQHandler(void)
+/*
+static void CMD_send_splash(uart_stdio_typedef* p_uart)
 {
-    if(LL_USART_IsActiveFlag_TXE(GPC_UART.handle) == true)
+    for(uint8_t i = 0 ; i < 21 ; i++)
     {
-        if(TX_BUFFER_EMPTY(&GPC_UART))
-        {
-            // Buffer empty, so disable interrupts
-            LL_USART_DisableIT_TXE(GPC_UART.handle);
-        }
-        else
-        {
-            // There is more data in the output buffer. Send the next byte
-            UART_Prime_Transmit(&GPC_UART);
-        }
-    }
-
-    if(LL_USART_IsActiveFlag_RXNE(GPC_UART.handle) == true)
-    {
-        GPC_UART.RX_irq_char = LL_USART_ReceiveData8(GPC_UART.handle);
-
-        // NOTE: On win 10, default PUTTY when hit enter only send back '\r',
-        // while on default HERCULES when hit enter send '\r\n' in that order.
-        // The code bellow is modified so that it can work on PUTTY and HERCULES.
-        if((!RX_BUFFER_FULL(&GPC_UART)) && (GPC_UART.RX_irq_char != '\n'))
-        {
-            if (GPC_UART.RX_irq_char == '\r')
-            {
-                GPC_UART.p_RX_buffer[GPC_UART.RX_write_index] = '\n';
-                ADVANCE_RX_WRITE_INDEX(&GPC_UART);
-            }
-            else
-            {
-                GPC_UART.p_RX_buffer[GPC_UART.RX_write_index] = GPC_UART.RX_irq_char;
-                ADVANCE_RX_WRITE_INDEX(&GPC_UART);
-            }
-        }
-    }
+		UART_Send_String(p_uart, &SPLASH[i][0]);
+	}
+	UART_Send_String(p_uart, "> ");
 }
+*/
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
