@@ -17,6 +17,7 @@
 #include "v_switch_task.h"
 #include "cmd_line_task.h"
 #include "fsp_line_task.h"
+#include "impedance_task.h"
 
 // INCLUDE LIB //
 #include "uart.h"

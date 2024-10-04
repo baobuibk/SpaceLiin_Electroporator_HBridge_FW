@@ -16,6 +16,8 @@
         "fsp.h": "c",
         "fsp_line_task.h": "c",
         "board.h": "c",
-        "stm32f0xx_ll_rcc.h": "c"
+        "stm32f0xx_ll_rcc.h": "c",
+        "v_switch_task.h": "c",
+        "adc.h": "c"
     }
 }

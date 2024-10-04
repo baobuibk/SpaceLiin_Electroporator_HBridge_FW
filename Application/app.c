@@ -23,27 +23,24 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
 
                     },
-
-//                    {
-//                            &CMD_Line_Task,
-//                            (void *) 0,
-//                            15,                         //call every 1ms
-//                            0,                          //count from start
-//                            true                        //is active
-//                    },
-
+                    {
+                            &ADC_Task,
+                            (void *) 0,
+                            10,                      //call every 1ms
+                            0,                          //count from start
+                            false                       //is active
+                    },
+                    {
+                            &Impedance_Task,
+                            (void *) 0,
+                            10,                      //call every 1ms
+                            0,                          //count from start
+                            false                       //is active
+                    },
                     {
                             &Status_Led,
                             (void *) 0,
                             10000,                      //call every 1ms
-                            0,                          //count from start
-                            true                        //is active
-                    },
-
-                    {
-                            &ADC_Task,
-                            (void *) 0,
-                            200,                        //call every 1ms
                             0,                          //count from start
                             true                        //is active
                     },
@@ -55,7 +52,7 @@ void App_Main(void)
     // can run scheduler tick max @ 100us.
     SchedulerInit(10000);
 
-    ADC_Task_Init(LL_ADC_SAMPLINGTIME_7CYCLES_5);
+    ADC_Task_Init(LL_ADC_SAMPLINGTIME_239CYCLES_5);
     H_Bridge_Task_Init();
     V_Switch_Task_Init();
     FSP_Line_Task_Init();

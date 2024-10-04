@@ -13,6 +13,8 @@
 #define ADC_I_SENSE_CHANNEL     LL_ADC_CHANNEL_2
 #define ADC_I_SENSE_IRQ         ADC1_IRQn
 
+#define I_SENSE_TIMER_HANDLE    TIM3
+
 #define OCP_ALERT_PORT          GPIOC
 #define OCP_ALERT_PIN           LL_GPIO_PIN_13
 
@@ -107,8 +109,8 @@
 #define DECOD_HS_EN_PIN         LL_GPIO_PIN_8
 /***********************************************/
 
-#define GPC_TX_BUF_LEN			64
-#define	GPC_RX_BUF_LEN			64
+#define GPP_TX_SIZE			64
+#define	GPP_RX_SIZE			64
 #define FSP_BUF_LEN				64
 
 #endif /* BOARD_H_ */

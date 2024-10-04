@@ -3,6 +3,7 @@
 #define _FSP_FRAME_H
 
 // Commands
+// FROM GPC TO GPP
 #define FSP_CMD_PULSE_COUNT             0x01       /**< Set number of pulse. */		//
 #define FSP_CMD_PULSE_DELAY             0x02
 #define FSP_CMD_PULSE_HV	            0x03       /**< Set hs pulse on time and off time. */
@@ -13,7 +14,10 @@
 #define FSP_CMD_CHANNEL_SET             0x08
 #define FSP_CMD_CHANNEL_CONTROL         0x09
 #define FSP_CMD_GET_CURRENT				0x0A	//Get current
+
+// FROM GPP TO GPC
 #define FSP_CMD_HANDSHAKE				0x0B
+#define FSP_CMD_AVR_CURRENT				0x0C
 
 
 typedef struct _COMMON_FRAME_
@@ -97,12 +101,19 @@ typedef struct _COMMON_RESPONSE_FRAME_
 
 typedef struct _CURRENT_RESPONSE_FRAME_
 {
-	uint8_t Cmd;
-	uint16_t Current;
+	uint8_t 	Cmd;
+	uint16_t 	Current;
 } CURRENT_RESPONSE_FRAME;
 
+typedef struct _AVR_CURRENT_FRAME_
+{
+	uint8_t Cmd;
+	float 	Value;
+} AVR_CURRENT_FRAME;
+
+
 // Union to encapsulate all frame types
-typedef union _GPP_Sfp_Payload_ {
+typedef union _GPC_FSP_Payload_ {
 	COMMON_FRAME							commonFrame;
 	FSP_PULSE_COUNT							pulseCount;
 	FSP_PULSE_DELAY							pulseDelay;
@@ -115,13 +126,14 @@ typedef union _GPP_Sfp_Payload_ {
 	FSP_CHANNEL_CONTROL						channelControl;
 	FSP_GET_CURRENT							currentGet;
 	FSP_HANDSAKE							handshake;
-} GPC_Sfp_Payload;
+} GPC_FSP_Payload;
 
-typedef union _GPC_Sfp_Payload_ {
+typedef union _GPP_FSP_Payload_ {
 	COMMON_RESPONSE_FRAME					commonFrame;
 	CURRENT_RESPONSE_FRAME					currentResponse;
 	FSP_HANDSAKE							handshake;
-} GPP_Sfp_Payload;
+	AVR_CURRENT_FRAME						avr_current;
+} GPP_FSP_Payload;
 
 
 #endif
