@@ -7309,7 +7309,7 @@ static HAL_StatusTypeDef I2C_IsErrorOccurred(I2C_HandleTypeDef *hi2c, uint32_t T
   }
 
   return status;
-}
+ }
 
 /**
   * @brief  Handles I2Cx communication when starting transfer or during transfer (TC or TCR flag are set).

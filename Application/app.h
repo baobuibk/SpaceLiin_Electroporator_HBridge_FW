@@ -18,6 +18,7 @@
 
 // INCLUDE LIB //
 #include "uart.h"
+#include "BMP390.h"
 
 void App_Main(void);
 
