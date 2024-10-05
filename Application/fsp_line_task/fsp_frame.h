@@ -92,7 +92,7 @@ typedef struct _FSP_GET_CURRENT_
 typedef struct _FSP_GET_IMPEDANCE_
 {
 	uint8_t Cmd;            /* The command class */
-	uint16_t Period;
+	uint8_t Period;
 } FSP_GET_IMPEDANCE;
 
 typedef struct _FSP_HANDSAKE_
@@ -109,13 +109,14 @@ typedef struct _COMMON_RESPONSE_FRAME_
 typedef struct _CURRENT_RESPONSE_FRAME_
 {
 	uint8_t 	Cmd;
-	uint16_t 	Current;
+	uint8_t 	Current;
 } CURRENT_RESPONSE_FRAME;
 
 typedef struct _AVR_CURRENT_FRAME_
 {
 	uint8_t 	Cmd;
-	uint16_t 	Value;
+	uint8_t 	Value_high;
+	uint8_t 	Value_low;
 } AVR_CURRENT_FRAME;
 
 

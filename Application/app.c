@@ -52,7 +52,7 @@ void App_Main(void)
     // can run scheduler tick max @ 100us.
     SchedulerInit(10000);
 
-    ADC_Task_Init(LL_ADC_SAMPLINGTIME_239CYCLES_5);
+    ADC_Task_Init(LL_ADC_SAMPLINGTIME_7CYCLES_5);
     H_Bridge_Task_Init();
     V_Switch_Task_Init();
     FSP_Line_Task_Init();
