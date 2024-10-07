@@ -101,19 +101,23 @@ void Impedance_Task(void*)
         LL_TIM_OC_SetMode(V_SWITCH_LIN2_HANDLE, V_SWITCH_LIN2_CHANNEL, LL_TIM_OCMODE_PWM1);
 
         // STOP THE CNT AND RESET IT TO 0.
-        LL_TIM_DisableCounter(V_SWITCH_LIN1_HANDLE);
-        PWM_Set_Freq(&V_Switch_1_PWM, 1000 / 100);
-        PWM_Set_Duty(&V_Switch_1_PWM, 0);
-        LL_TIM_OC_SetMode(V_SWITCH_LIN1_HANDLE, V_SWITCH_LIN1_CHANNEL, LL_TIM_OCMODE_PWM1);
-        V_Switch_Set_Freq(&V_Switch_1_PWM, 10000);
-        V_Switch_Set_Duty(&V_Switch_1_PWM, 50);
+        //LL_TIM_DisableCounter(V_SWITCH_LIN1_HANDLE);
+        //PWM_Set_Freq(&V_Switch_1_PWM, 1000 / 1);
+        //PWM_Set_Duty(&V_Switch_1_PWM, 0);
+        //LL_TIM_OC_SetMode(V_SWITCH_LIN1_HANDLE, V_SWITCH_LIN1_CHANNEL, LL_TIM_OCMODE_PWM1);
+        //V_Switch_Set_Freq(&V_Switch_1_PWM, 10000);
+       // V_Switch_Set_Duty(&V_Switch_1_PWM, 50);
+        //LL_TIM_GenerateEvent_UPDATE(V_Switch_1_PWM.TIMx);
 
-        LL_TIM_ClearFlag_UPDATE(V_SWITCH_LIN1_HANDLE);
-        LL_TIM_EnableIT_UPDATE(V_SWITCH_LIN1_HANDLE);
-        LL_TIM_EnableCounter(V_SWITCH_LIN1_HANDLE);
+        //LL_TIM_ClearFlag_UPDATE(V_SWITCH_LIN1_HANDLE);
+        //LL_TIM_EnableIT_UPDATE(V_SWITCH_LIN1_HANDLE);
+        //LL_TIM_EnableCounter(V_SWITCH_LIN1_HANDLE);
+        LL_GPIO_SetOutputPin(V_SWITCH_HIN1_PORT, V_SWITCH_HIN1_PIN);
+
+        LL_GPIO_SetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
+        LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
 
         //LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_INACTIVE);
-        LL_GPIO_SetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
         //LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
 
         Impedance_Current_Average   = 0;
@@ -173,6 +177,9 @@ void Impedance_Task(void*)
             // DISABLE PWM
             LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
             LL_TIM_OC_SetMode(H_BRIDGE_SD2_HANDLE, H_BRIDGE_SD2_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
+
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
+            LL_GPIO_ResetOutputPin(H_BRIDGE_HIN2_PORT, H_BRIDGE_HIN2_PIN);
 
             is_impedance_task_enable = false;
             Impedance_State = IMPEDANCE_STOP_STATE;

@@ -91,9 +91,10 @@ uint8_t     lv_off_time_ms              = 1;
 void H_Bridge_Task_Init(void)
 {     // H bridge 1 init
     PWM_Init(&H_Bridge_1_PWM);
-    PWM_Disable(&H_Bridge_1_PWM);
+    //PWM_Disable(&H_Bridge_1_PWM);
     LL_TIM_OC_SetMode(H_BRIDGE_SD1_HANDLE, H_BRIDGE_SD1_CHANNEL, LL_TIM_OCMODE_FORCED_ACTIVE);
     PWM_Enable(&H_Bridge_1_PWM);
+    LL_GPIO_ResetOutputPin(H_BRIDGE_HIN1_PORT, H_BRIDGE_HIN1_PIN);
     LL_TIM_DisableIT_UPDATE(H_Bridge_1_PWM.TIMx);
 
     // H bridge lowside

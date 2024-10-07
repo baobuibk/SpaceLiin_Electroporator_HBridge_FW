@@ -224,6 +224,7 @@ void FSP_Line_Process() {
 		case FSP_CMD_GET_IMPEDANCE:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_CHANNEL_CONTROL\r\n");
 			Impedance_Measure_Period = pu_GPC_FSP_Payload->get_impedance.Period * 1000;
+			is_h_bridge_enable = false;
 			is_impedance_task_enable = true;
 			SchedulerTaskEnable(3, 1);
 			break;
