@@ -14,6 +14,7 @@
 #define FSP_CMD_CHANNEL_CONTROL         0x09
 #define FSP_CMD_GET_CURRENT				0x0A	//Get current
 #define FSP_CMD_HANDSHAKE				0x0B
+#define FSP_CMD_GET_BMP390				0x0C
 
 
 typedef struct _COMMON_FRAME_
@@ -100,6 +101,14 @@ typedef struct _CURRENT_RESPONSE_FRAME_
 	uint8_t Cmd;
 	uint16_t Current;
 } CURRENT_RESPONSE_FRAME;
+typedef struct _GET_BMP390_ {
+	uint8_t Cmd;
+	uint8_t temp[5];
+	uint8_t pressure[6];
+
+
+
+} GET_BMP390;
 
 // Union to encapsulate all frame types
 typedef union _GPP_Sfp_Payload_ {
@@ -121,6 +130,7 @@ typedef union _GPC_Sfp_Payload_ {
 	COMMON_RESPONSE_FRAME					commonFrame;
 	CURRENT_RESPONSE_FRAME					currentResponse;
 	FSP_HANDSAKE							handshake;
+	GET_BMP390								getBMP390;
 } GPP_Sfp_Payload;
 
 

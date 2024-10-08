@@ -85,8 +85,9 @@ typedef struct
     uint8_t src_adr;                            /**< Source address. */
     uint8_t dst_adr;                            /**< Destination address. */
     uint8_t length;                             /**< Length of the packet payload. */
-    uint8_t type;                               /**< Type of packet. */
+    uint8_t type;
     uint8_t payload[FSP_PAYLOAD_MAX_LENGTH];    /**< Payload of the packet. */
+                              /**< Type of packet. */
     uint16_t crc16;                             /**< CRC16-CCITT bytes. */
     uint8_t eof;
 } fsp_packet_t;
