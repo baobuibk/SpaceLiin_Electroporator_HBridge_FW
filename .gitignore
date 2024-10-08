@@ -1,7 +1,7 @@
 # Ignore CubeIDE specific files
-/.cproject
-/.project
-/.settings/
+#/.cproject
+#/.project
+#/.settings/
 
 # Ignore build artifacts and binaries
 /Debug/*
