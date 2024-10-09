@@ -29,12 +29,6 @@ void H_Bridge_Task_Init(void);
 /* :::::::::: H Bridge Task ::::::::::::: */
 void H_Bridge_Task(void*);
 
-/* ::::H_Bridge High Side Interupt Handle:::: */
-void H_Bridge_1_Interupt_Handle();
-
-/* ::::H_Bridge Low Side Interupt Handle:::: */
-void H_Bridge_2_Interupt_Handle();
-
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #endif /* H_TASK_H_ */

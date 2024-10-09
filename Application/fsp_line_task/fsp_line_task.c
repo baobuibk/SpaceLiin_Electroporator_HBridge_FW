@@ -192,6 +192,7 @@ void FSP_Line_Process() {
 		case FSP_CMD_PULSE_CONTROL:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_CONTROL\r\n");
 			is_h_bridge_enable = pu_GPC_FSP_Payload->pulseControl.State;
+			SchedulerTaskEnable(0, 1);
 			break;
 		case FSP_CMD_RELAY_SET:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_RELAY_SET\r\n");

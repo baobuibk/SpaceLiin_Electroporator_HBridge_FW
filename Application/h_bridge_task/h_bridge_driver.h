@@ -1,40 +1,55 @@
-#ifndef H_TASK_H_
-#define H_TASK_H_
+#ifndef H_BRIDGE_DRIVER_H_
+#define H_BRIDGE_DRIVER_H_
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Include ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "stm32f0xx_ll_gpio.h"
+#include "pwm.h"
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+typedef enum _H_Bridge_mode_typedef_
+{
+    H_BRIDGE_MODE_HS_ON,
+    H_BRIDGE_MODE_LS_ON,
+    H_BRIDGE_MODE_FLOAT,
+    H_BRIDGE_MODE_PULSE,
+}H_Bridge_mode;
+
+typedef struct _H_Bridge_typdef_
+{
+    GPIO_TypeDef    *Port;
+    uint32_t        Pin;
+    bool            Pin_State;
+    PWM_TypeDef     *PWM;
+    H_Bridge_mode   Mode;
+    uint16_t        delay_time_ms;
+    uint16_t        on_time_ms;
+    uint16_t        off_time_ms;
+    uint16_t        pulse_count;
+    uint16_t        set_pulse_count;
+}H_Bridge_typdef;
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-extern bool                     is_h_bridge_enable;
+extern H_Bridge_typdef H_Bridge_1;
+extern H_Bridge_typdef H_Bridge_2;
 
-extern uint8_t                  pulse_delay_ms;
-
-extern uint8_t                  hv_pulse_count;
-extern uint8_t                  hv_on_time_ms;
-extern uint8_t                  hv_off_time_ms;
-
-extern uint8_t                  lv_pulse_count;
-extern uint8_t                  lv_on_time_ms;
-extern uint8_t                  lv_off_time_ms;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-/* :::::::::: H Bridge Task Init :::::::: */
-void H_Bridge_Task_Init(void);
+void H_Bridge_Driver_Init(void);
 
-/* :::::::::: H Bridge Task ::::::::::::: */
-void H_Bridge_Task(void*);
+void H_Bridge_Set_Mode(H_Bridge_typdef* H_Bridge_x, H_Bridge_mode SetMode);
 
-/* ::::H_Bridge High Side Interupt Handle:::: */
+void H_Bridge_Set_Pulse_Timing(H_Bridge_typdef* H_Bridge_x, uint16_t Set_delay_time_ms, uint16_t Set_on_time_ms, uint16_t Set_off_time_ms, uint16_t Set_pulse_count);
+
+void H_Bridge_Kill(void);
+
 void H_Bridge_1_Interupt_Handle();
-
-/* ::::H_Bridge Low Side Interupt Handle:::: */
 void H_Bridge_2_Interupt_Handle();
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#endif /* H_TASK_H_ */
+#endif /* H_BRIDGE_DRIVER_H_ */
