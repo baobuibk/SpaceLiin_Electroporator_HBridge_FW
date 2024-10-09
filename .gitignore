@@ -5,7 +5,7 @@
 
 # Ignore build artifacts and binaries
 /Debug/*
-!Debug/GP_Controller.bin
+!Debug/GP_Pulse.bin
 /Release/
 /build/
 /out/
