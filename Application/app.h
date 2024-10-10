@@ -19,6 +19,9 @@
 #include "fsp_line_task.h"
 #include "impedance_task.h"
 
+// INCLUDE DRIVER //
+#include "h_bridge_driver.h"
+
 // INCLUDE LIB //
 #include "uart.h"
 
