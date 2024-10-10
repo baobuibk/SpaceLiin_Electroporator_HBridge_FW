@@ -56,7 +56,7 @@ void FSP_Line_Task_Init() {
 	FSP_line.buffer_size = FSP_BUF_LEN;
 	FSP_line.write_index = 0;
 
-	pu_GPP_FSP_Payload = (GPC_FSP_Payload*) (&s_GPP_FSP_Packet.payload);
+	pu_GPP_FSP_Payload = (GPP_FSP_Payload*) (&s_GPP_FSP_Packet.payload);
 	pu_GPC_FSP_Payload = (GPC_FSP_Payload*) (&s_GPC_FSP_Packet.payload);
 
 	if (FSP_line.buffer_size != 0) {
@@ -246,7 +246,7 @@ void FSP_Line_Process() {
 			uint8_t frame_len;
 			fsp_encode(&s_GPP_FSP_Packet, encoded_frame, &frame_len);
 
-			UART_FSP(&GPC_UART, encoded_frame, frame_len);
+			UART_FSP(&GPC_UART, (char*)encoded_frame, frame_len);
 			break;
 		default:
 			break;

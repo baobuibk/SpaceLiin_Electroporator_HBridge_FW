@@ -20,6 +20,8 @@
         "v_switch_task.h": "c",
         "adc.h": "c",
         "h_bridge_driver.h": "c",
-        "impedance_task.h": "c"
+        "impedance_task.h": "c",
+        "pwm_inline.h": "c",
+        "v_switch_driver.h": "c"
     }
 }

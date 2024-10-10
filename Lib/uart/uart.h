@@ -6,7 +6,7 @@
 
 #include "app.h"
 
-struct _uart_stdio_typedef
+typedef struct _uart_stdio_typedef
 {
     USART_TypeDef*          handle;
     IRQn_Type		        irqn;
@@ -21,10 +21,8 @@ struct _uart_stdio_typedef
                 char*       p_RX_buffer;
     volatile    uint16_t    RX_write_index;
     volatile    uint16_t    RX_read_index;
-    volatile    char     RX_irq_char;
-};
-
-typedef struct _uart_stdio_typedef uart_stdio_typedef;
+    volatile    char        RX_irq_char;
+}uart_stdio_typedef;
 
 void UART_Init( uart_stdio_typedef* p_uart, USART_TypeDef* _handle,
                 IRQn_Type _irqn, char* _p_TX_buffer, char* _p_RX_buffer,
