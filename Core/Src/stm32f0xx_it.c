@@ -66,66 +66,72 @@ extern TIM_HandleTypeDef htim1;
 /*           Cortex-M0 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
- * @brief This function handles Non maskable interrupt.
- */
-void NMI_Handler(void) {
-	/* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+  * @brief This function handles Non maskable interrupt.
+  */
+void NMI_Handler(void)
+{
+  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
-	/* USER CODE END NonMaskableInt_IRQn 0 */
-	/* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+  /* USER CODE END NonMaskableInt_IRQn 0 */
+  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
 	while (1) {
 	}
-	/* USER CODE END NonMaskableInt_IRQn 1 */
+  /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
- * @brief This function handles Hard fault interrupt.
- */
-void HardFault_Handler(void) {
-	/* USER CODE BEGIN HardFault_IRQn 0 */
+  * @brief This function handles Hard fault interrupt.
+  */
+void HardFault_Handler(void)
+{
+  /* USER CODE BEGIN HardFault_IRQn 0 */
 
-	/* USER CODE END HardFault_IRQn 0 */
-	while (1) {
-		/* USER CODE BEGIN W1_HardFault_IRQn 0 */
-		/* USER CODE END W1_HardFault_IRQn 0 */
-	}
+  /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    /* USER CODE END W1_HardFault_IRQn 0 */
+  }
 }
 
 /**
- * @brief This function handles System service call via SWI instruction.
- */
-void SVC_Handler(void) {
-	/* USER CODE BEGIN SVC_IRQn 0 */
+  * @brief This function handles System service call via SWI instruction.
+  */
+void SVC_Handler(void)
+{
+  /* USER CODE BEGIN SVC_IRQn 0 */
 
-	/* USER CODE END SVC_IRQn 0 */
-	/* USER CODE BEGIN SVC_IRQn 1 */
+  /* USER CODE END SVC_IRQn 0 */
+  /* USER CODE BEGIN SVC_IRQn 1 */
 
-	/* USER CODE END SVC_IRQn 1 */
+  /* USER CODE END SVC_IRQn 1 */
 }
 
 /**
- * @brief This function handles Pendable request for system service.
- */
-void PendSV_Handler(void) {
-	/* USER CODE BEGIN PendSV_IRQn 0 */
+  * @brief This function handles Pendable request for system service.
+  */
+void PendSV_Handler(void)
+{
+  /* USER CODE BEGIN PendSV_IRQn 0 */
 
-	/* USER CODE END PendSV_IRQn 0 */
-	/* USER CODE BEGIN PendSV_IRQn 1 */
+  /* USER CODE END PendSV_IRQn 0 */
+  /* USER CODE BEGIN PendSV_IRQn 1 */
 
-	/* USER CODE END PendSV_IRQn 1 */
+  /* USER CODE END PendSV_IRQn 1 */
 }
 
 /**
- * @brief This function handles System tick timer.
- */
-void SysTick_Handler(void) {
-	/* USER CODE BEGIN SysTick_IRQn 0 */
+  * @brief This function handles System tick timer.
+  */
+void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
 	SchedulerSysTickIntHandler();
-	/* USER CODE END SysTick_IRQn 0 */
+  /* USER CODE END SysTick_IRQn 0 */
 
-	/* USER CODE BEGIN SysTick_IRQn 1 */
+  /* USER CODE BEGIN SysTick_IRQn 1 */
 
-	/* USER CODE END SysTick_IRQn 1 */
+  /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -136,100 +142,95 @@ void SysTick_Handler(void) {
 /******************************************************************************/
 
 /**
- * @brief This function handles ADC interrupt.
- */
-void ADC1_IRQHandler(void) {
-	/* USER CODE BEGIN ADC1_IRQn 0 */
-	I_SENSE_ADC_IRQHandler();
-	/* USER CODE END ADC1_IRQn 0 */
-	/* USER CODE BEGIN ADC1_IRQn 1 */
+  * @brief This function handles TIM1 break, update, trigger and commutation interrupts.
+  */
+void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 0 */
 
-	/* USER CODE END ADC1_IRQn 1 */
+  /* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim1);
+  /* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 1 */
+
+  /* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 1 */
 }
 
 /**
- * @brief This function handles TIM1 break, update, trigger and commutation interrupts.
- */
-void TIM1_BRK_UP_TRG_COM_IRQHandler(void) {
-	/* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 0 */
-
-	/* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 0 */
-	HAL_TIM_IRQHandler(&htim1);
-	/* USER CODE BEGIN TIM1_BRK_UP_TRG_COM_IRQn 1 */
-
-	/* USER CODE END TIM1_BRK_UP_TRG_COM_IRQn 1 */
-}
-
-/**
- * @brief This function handles TIM3 global interrupt.
- */
-void TIM3_IRQHandler(void) {
-	/* USER CODE BEGIN TIM3_IRQn 0 */
+  * @brief This function handles TIM3 global interrupt.
+  */
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
 	V_Switch_1_Interupt_Handle();
-	/* USER CODE END TIM3_IRQn 0 */
-	/* USER CODE BEGIN TIM3_IRQn 1 */
+  /* USER CODE END TIM3_IRQn 0 */
+  /* USER CODE BEGIN TIM3_IRQn 1 */
 
-	/* USER CODE END TIM3_IRQn 1 */
+  /* USER CODE END TIM3_IRQn 1 */
 }
 
 /**
- * @brief This function handles TIM14 global interrupt.
- */
-void TIM14_IRQHandler(void) {
-	/* USER CODE BEGIN TIM14_IRQn 0 */
+  * @brief This function handles TIM14 global interrupt.
+  */
+void TIM14_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM14_IRQn 0 */
 	H_Bridge_1_Interupt_Handle();
-	/* USER CODE END TIM14_IRQn 0 */
-	/* USER CODE BEGIN TIM14_IRQn 1 */
+  /* USER CODE END TIM14_IRQn 0 */
+  /* USER CODE BEGIN TIM14_IRQn 1 */
 
-	/* USER CODE END TIM14_IRQn 1 */
+  /* USER CODE END TIM14_IRQn 1 */
 }
 
 /**
- * @brief This function handles TIM15 global interrupt.
- */
-void TIM15_IRQHandler(void) {
-	/* USER CODE BEGIN TIM15_IRQn 0 */
+  * @brief This function handles TIM15 global interrupt.
+  */
+void TIM15_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM15_IRQn 0 */
 	H_Bridge_2_Interupt_Handle();
-	/* USER CODE END TIM15_IRQn 0 */
-	/* USER CODE BEGIN TIM15_IRQn 1 */
+  /* USER CODE END TIM15_IRQn 0 */
+  /* USER CODE BEGIN TIM15_IRQn 1 */
 
-	/* USER CODE END TIM15_IRQn 1 */
+  /* USER CODE END TIM15_IRQn 1 */
 }
 
 /**
- * @brief This function handles TIM16 global interrupt.
- */
-void TIM16_IRQHandler(void) {
-	/* USER CODE BEGIN TIM16_IRQn 0 */
+  * @brief This function handles TIM16 global interrupt.
+  */
+void TIM16_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM16_IRQn 0 */
 	V_Switch_2_Interupt_Handle();
-	/* USER CODE END TIM16_IRQn 0 */
-	/* USER CODE BEGIN TIM16_IRQn 1 */
+  /* USER CODE END TIM16_IRQn 0 */
+  /* USER CODE BEGIN TIM16_IRQn 1 */
 
-	/* USER CODE END TIM16_IRQn 1 */
+  /* USER CODE END TIM16_IRQn 1 */
 }
 
 /**
- * @brief This function handles USART1 global interrupt.
- */
-void USART1_IRQHandler(void) {
-	/* USER CODE BEGIN USART1_IRQn 0 */
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
 	GPC_UART_IRQHandler();
-	/* USER CODE END USART1_IRQn 0 */
-	/* USER CODE BEGIN USART1_IRQn 1 */
+  /* USER CODE END USART1_IRQn 0 */
+  /* USER CODE BEGIN USART1_IRQn 1 */
 
-	/* USER CODE END USART1_IRQn 1 */
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
- * @brief This function handles USART3 to USART6 global interrupts.
- */
-void USART3_6_IRQHandler(void) {
-	/* USER CODE BEGIN USART3_6_IRQn 0 */
+  * @brief This function handles USART3 to USART6 global interrupts.
+  */
+void USART3_6_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART3_6_IRQn 0 */
 	RS232_IRQHandler();
-	/* USER CODE END USART3_6_IRQn 0 */
-	/* USER CODE BEGIN USART3_6_IRQn 1 */
+  /* USER CODE END USART3_6_IRQn 0 */
+  /* USER CODE BEGIN USART3_6_IRQn 1 */
 
-	/* USER CODE END USART3_6_IRQn 1 */
+  /* USER CODE END USART3_6_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

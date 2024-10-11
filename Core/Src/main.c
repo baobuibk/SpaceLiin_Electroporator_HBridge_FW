@@ -41,6 +41,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+I2C_HandleTypeDef hi2c2;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -146,7 +148,6 @@ void SystemClock_Config(void)
 
   }
   LL_RCC_HSI14_SetCalibTrimming(16);
-  LL_RCC_HSE_EnableCSS();
   LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLL_MUL_9, LL_RCC_PREDIV_DIV_2);
   LL_RCC_PLL_Enable();
 
@@ -204,10 +205,6 @@ static void MX_ADC_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* ADC interrupt Init */
-  NVIC_SetPriority(ADC1_IRQn, 3);
-  NVIC_EnableIRQ(ADC1_IRQn);
-
   /* USER CODE BEGIN ADC_Init 1 */
 
   /* USER CODE END ADC_Init 1 */
@@ -230,7 +227,7 @@ static void MX_ADC_Init(void)
   ADC_REG_InitStruct.Overrun = LL_ADC_REG_OVR_DATA_PRESERVED;
   LL_ADC_REG_Init(ADC1, &ADC_REG_InitStruct);
   LL_ADC_REG_SetSequencerScanDirection(ADC1, LL_ADC_REG_SEQ_SCAN_DIR_FORWARD);
-  LL_ADC_SetSamplingTimeCommonChannels(ADC1, LL_ADC_SAMPLINGTIME_7CYCLES_5);
+  LL_ADC_SetSamplingTimeCommonChannels(ADC1, LL_ADC_SAMPLINGTIME_1CYCLE_5);
   /* USER CODE BEGIN ADC_Init 2 */
 
   /* USER CODE END ADC_Init 2 */
@@ -249,53 +246,36 @@ static void MX_I2C2_Init(void)
 
   /* USER CODE END I2C2_Init 0 */
 
-  LL_I2C_InitTypeDef I2C_InitStruct = {0};
-
-  LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
-  /**I2C2 GPIO Configuration
-  PB13   ------> I2C2_SCL
-  PB14   ------> I2C2_SDA
-  */
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_13;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
-  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_14;
-  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_OPENDRAIN;
-  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-  GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
-  LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /* Peripheral clock enable */
-  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
-
   /* USER CODE BEGIN I2C2_Init 1 */
 
   /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.Timing = 0x00808CD2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-  /** I2C Initialization
+  /** Configure Analogue filter
   */
-  LL_I2C_DisableOwnAddress2(I2C2);
-  LL_I2C_DisableGeneralCall(I2C2);
-  LL_I2C_EnableClockStretching(I2C2);
-  I2C_InitStruct.PeripheralMode = LL_I2C_MODE_I2C;
-  I2C_InitStruct.Timing = 0x00808CD2;
-  I2C_InitStruct.AnalogFilter = LL_I2C_ANALOGFILTER_ENABLE;
-  I2C_InitStruct.DigitalFilter = 0;
-  I2C_InitStruct.OwnAddress1 = 0;
-  I2C_InitStruct.TypeAcknowledge = LL_I2C_ACK;
-  I2C_InitStruct.OwnAddrSize = LL_I2C_OWNADDRESS1_7BIT;
-  LL_I2C_Init(I2C2, &I2C_InitStruct);
-  LL_I2C_EnableAutoEndMode(I2C2);
-  LL_I2C_SetOwnAddress2(I2C2, 0, LL_I2C_OWNADDRESS2_NOMASK);
+  if (HAL_I2CEx_ConfigAnalogFilter(&hi2c2, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure Digital filter
+  */
+  if (HAL_I2CEx_ConfigDigitalFilter(&hi2c2, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
