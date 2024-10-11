@@ -70,7 +70,7 @@ void Impedance_Task(void*)
     case IMPEDANCE_STOP_STATE:
     if (is_impedance_task_enable == true)
     {
-        V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+        V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
         H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
         H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_HS_ON);
 

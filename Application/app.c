@@ -53,8 +53,8 @@ void App_Main(void)
     SchedulerInit(10000);
 
     ADC_Task_Init(LL_ADC_SAMPLINGTIME_7CYCLES_5);
-    H_Bridge_Task_Init();
-    V_Switch_Task_Init();
+    H_Bridge_Driver_Init();
+    V_Switch_Driver_Init();
     FSP_Line_Task_Init();
     CMD_Line_Task_Init();
 

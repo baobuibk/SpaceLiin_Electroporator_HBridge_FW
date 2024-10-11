@@ -104,15 +104,17 @@ void H_Bridge_Set_Mode(H_Bridge_typdef* H_Bridge_x, H_Bridge_mode SetMode)
     case H_BRIDGE_MODE_HS_ON:
     case H_BRIDGE_MODE_LS_ON:
         LL_TIM_OC_SetMode(H_Bridge_x->PWM->TIMx, H_Bridge_x->PWM->Channel, LL_TIM_OCMODE_PWM2);
-        HB_Set_ARR(H_Bridge_x->PWM, 120, 0); //Period = 1ms
-        HB_Set_OC(H_Bridge_x->PWM, 6, 0); //Duty = 50us
+        HB_Set_ARR(H_Bridge_x->PWM, 120, 1); //Period = 1ms
+        HB_Set_OC(H_Bridge_x->PWM, 6, 1); //Duty = 50us
+        H_Bridge_x->pulse_count = 0;
         H_Bridge_x->delay_time_ms = 0;
 
         break;
     case H_BRIDGE_MODE_FLOAT:
         LL_TIM_OC_SetMode(H_Bridge_x->PWM->TIMx, H_Bridge_x->PWM->Channel, LL_TIM_OCMODE_FORCED_INACTIVE);
-        HB_Set_ARR(H_Bridge_x->PWM, 0, 0); //Period = 1ms
-        HB_Set_OC(H_Bridge_x->PWM, 0, 0); //Duty = 50us
+        HB_Set_ARR(H_Bridge_x->PWM, 0, 1); //Period = 1ms
+        HB_Set_OC(H_Bridge_x->PWM, 0, 1); //Duty = 50us
+        H_Bridge_x->pulse_count = 0;
         H_Bridge_x->delay_time_ms = 0;
 
         break;
@@ -121,10 +123,10 @@ void H_Bridge_Set_Mode(H_Bridge_typdef* H_Bridge_x, H_Bridge_mode SetMode)
         break;
     }
 
-    if (H_Bridge_x->delay_time_ms == 0)
-    {
-        LL_TIM_GenerateEvent_UPDATE(H_Bridge_x->PWM->TIMx);
-    }
+    //if (H_Bridge_x->delay_time_ms == 0)
+    //{
+        //LL_TIM_GenerateEvent_UPDATE(H_Bridge_x->PWM->TIMx);
+    //}
 
     LL_TIM_ClearFlag_UPDATE(H_Bridge_x->PWM->TIMx);
     LL_TIM_EnableIT_UPDATE(H_Bridge_x->PWM->TIMx);
@@ -187,6 +189,7 @@ void H_Bridge_1_Interupt_Handle()
             LL_TIM_OC_SetMode(H_Bridge_1.PWM->TIMx, H_Bridge_1.PWM->Channel, LL_TIM_OCMODE_FORCED_ACTIVE);
             LL_TIM_GenerateEvent_UPDATE(H_Bridge_1.PWM->TIMx);
             LL_TIM_ClearFlag_UPDATE(H_Bridge_1.PWM->TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_1.PWM->TIMx);
             break;
         case H_BRIDGE_MODE_LS_ON:
             LL_GPIO_ResetOutputPin(H_Bridge_1.Port, H_Bridge_1.Pin);
@@ -194,6 +197,7 @@ void H_Bridge_1_Interupt_Handle()
             LL_TIM_OC_SetMode(H_Bridge_1.PWM->TIMx, H_Bridge_1.PWM->Channel, LL_TIM_OCMODE_FORCED_ACTIVE);
             LL_TIM_GenerateEvent_UPDATE(H_Bridge_1.PWM->TIMx);
             LL_TIM_ClearFlag_UPDATE(H_Bridge_1.PWM->TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_1.PWM->TIMx);
             break;
         case H_BRIDGE_MODE_FLOAT:
             LL_TIM_DisableIT_UPDATE(H_Bridge_1.PWM->TIMx);
@@ -239,6 +243,7 @@ void H_Bridge_2_Interupt_Handle()
             LL_TIM_OC_SetMode(H_Bridge_2.PWM->TIMx, H_Bridge_2.PWM->Channel, LL_TIM_OCMODE_FORCED_ACTIVE);
             LL_TIM_GenerateEvent_UPDATE(H_Bridge_2.PWM->TIMx);
             LL_TIM_ClearFlag_UPDATE(H_Bridge_2.PWM->TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_2.PWM->TIMx);
             break;
         case H_BRIDGE_MODE_LS_ON:
             LL_GPIO_ResetOutputPin(H_Bridge_2.Port, H_Bridge_2.Pin);
@@ -246,6 +251,7 @@ void H_Bridge_2_Interupt_Handle()
             LL_TIM_OC_SetMode(H_Bridge_2.PWM->TIMx, H_Bridge_2.PWM->Channel, LL_TIM_OCMODE_FORCED_ACTIVE);
             LL_TIM_GenerateEvent_UPDATE(H_Bridge_2.PWM->TIMx);
             LL_TIM_ClearFlag_UPDATE(H_Bridge_2.PWM->TIMx);
+            LL_TIM_DisableIT_UPDATE(H_Bridge_2.PWM->TIMx);
             break;
         case H_BRIDGE_MODE_FLOAT:
             LL_TIM_DisableIT_UPDATE(H_Bridge_2.PWM->TIMx);

@@ -33,8 +33,8 @@ PWM_TypeDef V_Switch_LV_PWM =
 
 V_Switch_typdef V_Switch_HV =
 {
-    .Port               = H_BRIDGE_HIN1_PORT,
-    .Pin                = H_BRIDGE_HIN1_PIN,
+    .Port               = V_SWITCH_HIN1_PORT,
+    .Pin                = V_SWITCH_HIN1_PIN,
     .Pin_State          = 0,
     .PWM                = &V_Switch_HV_PWM,
     //.Mode               = H_BRIDGE_MODE_LS_ON,
@@ -42,8 +42,8 @@ V_Switch_typdef V_Switch_HV =
 
 V_Switch_typdef V_Switch_LV =
 {
-    .Port               = H_BRIDGE_HIN2_PORT,
-    .Pin                = H_BRIDGE_HIN2_PIN,
+    .Port               = V_SWITCH_HIN2_PORT,
+    .Pin                = V_SWITCH_HIN2_PIN,
     .Pin_State          = 0,
     .PWM                = &V_Switch_LV_PWM,
     //.Mode               = H_BRIDGE_MODE_LS_ON,
@@ -64,11 +64,13 @@ void V_Switch_Driver_Init(void)
     PWM_Init(V_Switch_HV.PWM);
     PWM_Enable(V_Switch_HV.PWM);
     LL_GPIO_ResetOutputPin(V_Switch_HV.Port, V_Switch_HV.Pin);
+    LL_TIM_DisableIT_UPDATE(V_Switch_HV.PWM->TIMx);
 
     // V SWITCH LV INIT
     PWM_Init(V_Switch_LV.PWM);
     PWM_Enable(V_Switch_LV.PWM);
     LL_GPIO_ResetOutputPin(V_Switch_LV.Port, V_Switch_LV.Pin);
+    LL_TIM_DisableIT_UPDATE(V_Switch_LV.PWM->TIMx);
 }
 
 void V_Switch_Set_Mode(V_Switch_mode SetMode)
@@ -83,8 +85,8 @@ void V_Switch_Set_Mode(V_Switch_mode SetMode)
         LL_GPIO_ResetOutputPin(V_Switch_LV.Port, V_Switch_LV.Pin);
 
         LL_TIM_OC_SetMode(V_Switch_HV.PWM->TIMx, V_Switch_HV.PWM->Channel, LL_TIM_OCMODE_PWM2);
-        VS_Set_Freq(V_Switch_HV.PWM, 10000, 1);
-        VS_Set_OC(V_Switch_HV.PWM, 50, 1);
+        VS_Set_Freq(V_Switch_HV.PWM, 5000, 0);
+        VS_Set_Duty(V_Switch_HV.PWM, 50, 0);
         LL_GPIO_SetOutputPin(V_Switch_HV.Port, V_Switch_HV.Pin);
 
         break;
@@ -93,8 +95,8 @@ void V_Switch_Set_Mode(V_Switch_mode SetMode)
         LL_GPIO_ResetOutputPin(V_Switch_HV.Port, V_Switch_HV.Pin);
 
         LL_TIM_OC_SetMode(V_Switch_LV.PWM->TIMx, V_Switch_LV.PWM->Channel, LL_TIM_OCMODE_PWM2);
-        VS_Set_Freq(V_Switch_LV.PWM, 10000, 1);
-        VS_Set_OC(V_Switch_LV.PWM, 50, 1);
+        VS_Set_Freq(V_Switch_LV.PWM, 5000, 0);
+        VS_Set_Duty(V_Switch_LV.PWM, 50, 0);
         LL_GPIO_SetOutputPin(V_Switch_LV.Port, V_Switch_LV.Pin);
 
         break;
