@@ -18,6 +18,7 @@
 #include "cmd_line_task.h"
 #include "fsp_line_task.h"
 #include "impedance_task.h"
+#include "BMP390.h"
 
 // INCLUDE LIB //
 #include "uart.h"

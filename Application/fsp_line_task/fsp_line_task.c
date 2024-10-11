@@ -1,7 +1,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Include~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #include "fsp_line_task.h"
-
+#include <stdio.h>
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Defines ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -15,6 +15,7 @@ struct _fsp_line_typedef {
 	volatile uint16_t write_index;
 	volatile char RX_char;
 };
+void convertTemperature(float temp, uint8_t buf[]);
 typedef struct _fsp_line_typedef fsp_line_typedef;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 //static const char * ErrorCode[7] =
@@ -31,7 +32,8 @@ typedef struct _fsp_line_typedef fsp_line_typedef;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern uart_stdio_typedef RS232_UART;
 uart_stdio_typedef GPC_UART;
-
+extern double compensated_pressure;
+extern double compensated_temperature;
 char g_GPC_UART_TX_buffer[GPP_TX_SIZE];
 char g_GPC_UART_RX_buffer[GPP_RX_SIZE];
 
@@ -45,7 +47,8 @@ char g_FSP_line_buffer[FSP_BUF_LEN];
 
 bool is_receive_SOD = false;
 bool escape = false;
-
+float temp;
+uint32_t press;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* :::::::::: CMD Line Task Init :::::::: */
 void FSP_Line_Task_Init() {
@@ -247,6 +250,31 @@ void FSP_Line_Process() {
 
 			UART_FSP(&GPC_UART, encoded_frame, frame_len);
 			break;
+		case FSP_CMD_GET_BMP390:
+					UART_Send_String(&RS232_UART, "Received BMP_390 command\r\n");
+					pu_GPP_FSP_Payload->getBMP390.Cmd = FSP_CMD_GET_BMP390	;
+					float temp = (float)compensated_temperature;
+					uint32_t press= (uint32_t)compensated_pressure;
+
+					convertTemperature(temp, pu_GPP_FSP_Payload->getBMP390.temp);
+
+					sprintf(pu_GPP_FSP_Payload->getBMP390.pressure, "%d", press);
+
+					s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
+					s_GPP_FSP_Packet.src_adr = fsp_my_adr;
+					s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
+					s_GPP_FSP_Packet.length = 12;
+					s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
+					s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
+					s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
+									&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+
+					uint8_t encoded_frame1[20] = { 0 };
+					uint8_t frame_len1;
+					fsp_encode(&s_GPP_FSP_Packet, encoded_frame1, &frame_len1);
+
+					UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
+					break;
 		default:
 			break;
 		}
@@ -262,4 +290,11 @@ void FSP_Line_Process() {
 	}
 }
 
+void convertTemperature(float temp, uint8_t buf[]) {
+	// temperature is xxx.x format
+	//float to byte
+
+	gcvt(temp, 5, buf);
+
+}
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
