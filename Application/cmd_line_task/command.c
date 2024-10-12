@@ -65,8 +65,8 @@ int CMD_PULSE_COUNT(int argc, char *argv[])
     if ((receive_argm[0] > 20) || (receive_argm[1] > 20))
         return CMDLINE_INVALID_ARG;
 
-    hv_pulse_count   = receive_argm[0];
-    lv_pulse_count    = receive_argm[1];
+    //hv_pulse_count   = receive_argm[0];
+    //lv_pulse_count    = receive_argm[1];
 
     return CMDLINE_OK;
 }
@@ -249,6 +249,15 @@ int CMD_CHANNEL_CONTROL(int argc, char *argv[])
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void decode_ls_relay(uint8_t cuvette_code)
 {
+    if (cuvette_code <= 4)
+    {
+        cuvette_code -= 1;
+    }
+    else if (cuvette_code >= 6)
+    {
+        cuvette_code -= 2;
+    }
+
     if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_LS0_PORT, DECOD_LS0_PIN);
@@ -279,6 +288,15 @@ void decode_ls_relay(uint8_t cuvette_code)
 
 void decode_hs_relay(uint8_t cuvette_code)
 {
+    if (cuvette_code <= 4)
+    {
+        cuvette_code -= 1;
+    }
+    else if (cuvette_code >= 6)
+    {
+        cuvette_code -= 2;
+    }
+    
     if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);

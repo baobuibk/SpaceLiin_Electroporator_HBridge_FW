@@ -172,12 +172,20 @@ void FSP_Line_Process() {
 		switch (pu_GPC_FSP_Payload->commonFrame.Cmd) {
 		case FSP_CMD_PULSE_COUNT:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_COUNT\r\n");
-			hv_pulse_count = pu_GPC_FSP_Payload->pulseCount.HV_count;
-			lv_pulse_count = pu_GPC_FSP_Payload->pulseCount.LV_count;
+			hv_pulse_pos_count 	= pu_GPC_FSP_Payload->pulseCount.HV_pos_count;
+			hv_pulse_neg_count 	= pu_GPC_FSP_Payload->pulseCount.HV_neg_count;
+
+			lv_pulse_pos_count 	= pu_GPC_FSP_Payload->pulseCount.LV_pos_count;
+			lv_pulse_neg_count 	= pu_GPC_FSP_Payload->pulseCount.LV_neg_count;
 			break;
 		case FSP_CMD_PULSE_DELAY:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_DELAY\r\n");
-			pulse_delay_ms = pu_GPC_FSP_Payload->pulseDelay.Delay;
+			hv_delay_ms = pu_GPC_FSP_Payload->pulseDelay.HV_delay;
+			lv_delay_ms	= pu_GPC_FSP_Payload->pulseDelay.LV_delay;
+
+			pulse_delay_ms = pu_GPC_FSP_Payload->pulseDelay.Delay_high;
+			pulse_delay_ms <<= 8;
+			pulse_delay_ms = pu_GPC_FSP_Payload->pulseDelay.Delay_low;
 			break;
 		case FSP_CMD_PULSE_HV:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_HV\r\n");
@@ -186,8 +194,13 @@ void FSP_Line_Process() {
 			break;
 		case FSP_CMD_PULSE_LV:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_LV\r\n");
-			lv_on_time_ms = pu_GPC_FSP_Payload->pulseLV.OnTime;
-			lv_off_time_ms = pu_GPC_FSP_Payload->pulseLV.OffTime;
+			lv_on_time_ms 	= pu_GPC_FSP_Payload->pulseLV.OnTime_high;
+			lv_on_time_ms   <<= 8;
+			lv_on_time_ms	|= pu_GPC_FSP_Payload->pulseLV.OnTime_low;
+
+			lv_off_time_ms	= pu_GPC_FSP_Payload->pulseLV.OffTime_high;
+			lv_off_time_ms	<<= 8;
+			lv_off_time_ms	|= pu_GPC_FSP_Payload->pulseLV.OffTime_low;
 			break;
 		case FSP_CMD_PULSE_CONTROL:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_CONTROL\r\n");

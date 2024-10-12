@@ -14,7 +14,7 @@ PWM_TypeDef V_Switch_HV_PWM =
 {
     .TIMx       =   V_SWITCH_LIN1_HANDLE,
     .Channel    =   V_SWITCH_LIN1_CHANNEL,
-    .Prescaler  =   100,
+    .Prescaler  =   300,
     .Mode       =   LL_TIM_OCMODE_FORCED_INACTIVE,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
     .Duty       =   0,
@@ -24,7 +24,7 @@ PWM_TypeDef V_Switch_LV_PWM =
 {
     .TIMx       =   V_SWITCH_LIN2_HANDLE,
     .Channel    =   V_SWITCH_LIN2_CHANNEL,
-    .Prescaler  =   100,
+    .Prescaler  =   300,
     .Mode       =   LL_TIM_OCMODE_FORCED_INACTIVE,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
     .Duty       =   0,

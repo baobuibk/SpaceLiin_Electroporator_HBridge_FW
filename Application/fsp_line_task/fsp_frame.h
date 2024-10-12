@@ -29,14 +29,19 @@ typedef struct _COMMON_FRAME_
 typedef struct _FSP_PULSE_COUNT_
 {
 	uint8_t Cmd;            /* The command class */
-	uint8_t HV_count;		/* hv pulse count */
-	uint8_t LV_count;		/* lv pulse count */
+	uint8_t HV_pos_count;		/* hv pulse count */
+	uint8_t HV_neg_count;		/* hv pulse count */
+	uint8_t LV_pos_count;		/* lv pulse count */
+	uint8_t LV_neg_count;		/* lv pulse count */
 } FSP_PULSE_COUNT;
 
 typedef struct _FSP_PULSE_DELAY_
 {
 	uint8_t Cmd;           	/* The command class */
-	uint8_t Delay;		  	/* Delay time */
+	uint8_t HV_delay;
+	uint8_t LV_delay;
+	uint8_t Delay_high;		  	/* Delay time */
+	uint8_t Delay_low;		  	/* Delay time */
 } FSP_PULSE_DELAY;
 
 typedef struct _FSP_PULSE_HV_
@@ -49,8 +54,10 @@ typedef struct _FSP_PULSE_HV_
 typedef struct _FSP_PULSE_LV_
 {
 	uint8_t Cmd;            /* The command class */
-	uint8_t OnTime;      	/* LV On time */
-	uint8_t OffTime;      	/* LV Off time */
+	uint8_t OnTime_high;      	/* LV On time */
+	uint8_t OnTime_low;      	/* LV On time */
+	uint8_t OffTime_high;      	/* LV Off time */
+	uint8_t OffTime_low;      	/* LV Off time */
 } FSP_PULSE_LV;
 
 typedef struct _FSP_PULSE_CONTROL_

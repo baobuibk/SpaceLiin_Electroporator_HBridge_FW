@@ -20,20 +20,20 @@ PWM_TypeDef H_Bridge_1_PWM =
 {
     .TIMx       =   H_BRIDGE_SD1_HANDLE,
     .Channel    =   H_BRIDGE_SD1_CHANNEL,
-    .Prescaler  =   300,
+    .Prescaler  =   600,
     .Mode       =   LL_TIM_OCMODE_FORCED_ACTIVE,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
-    .Duty       =   6, //50us
+    .Duty       =   6, //100us
     .Freq       =   0,
 };
 PWM_TypeDef H_Bridge_2_PWM =
 {
     .TIMx       =   H_BRIDGE_SD2_HANDLE,
     .Channel    =   H_BRIDGE_SD2_CHANNEL,
-    .Prescaler  =   300,
+    .Prescaler  =   600,
     .Mode       =   LL_TIM_OCMODE_FORCED_ACTIVE,
     .Polarity   =   LL_TIM_OCPOLARITY_HIGH,
-    .Duty       =   6, //50us
+    .Duty       =   6, //100us
     .Freq       =   0,
 };
 

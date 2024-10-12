@@ -12,13 +12,17 @@ extern bool                     is_h_bridge_enable;
 
 extern uint8_t                  pulse_delay_ms;
 
-extern uint8_t                  hv_pulse_count;
+extern uint8_t                  hv_pulse_pos_count;
+extern uint8_t                  hv_pulse_neg_count;
+extern uint8_t                  hv_delay_ms;
 extern uint8_t                  hv_on_time_ms;
 extern uint8_t                  hv_off_time_ms;
 
-extern uint8_t                  lv_pulse_count;
-extern uint8_t                  lv_on_time_ms;
-extern uint8_t                  lv_off_time_ms;
+extern uint8_t                  lv_pulse_pos_count;
+extern uint8_t                  lv_pulse_neg_count;
+extern uint8_t                  lv_delay_ms;
+extern uint16_t                 lv_on_time_ms;
+extern uint16_t                 lv_off_time_ms;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Enum ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Struct ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Class ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
