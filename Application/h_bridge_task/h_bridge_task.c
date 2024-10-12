@@ -91,6 +91,8 @@ void H_Bridge_Task(void*)
         }
         else if(H_Bridge_1.pulse_count >= (H_Bridge_1.set_pulse_count * 2))
         {
+            V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+
             H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
             H_Bridge_Set_Pulse_Timing(&H_Bridge_2, hv_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
             H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
@@ -121,6 +123,8 @@ void H_Bridge_Task(void*)
         }
         else if(H_Bridge_1.pulse_count >= (H_Bridge_1.set_pulse_count * 2))
         {
+            V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+            
             H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
             H_Bridge_Set_Pulse_Timing(&H_Bridge_2, lv_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
             H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);

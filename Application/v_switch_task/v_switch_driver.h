@@ -19,8 +19,8 @@ typedef struct _V_Switch_typdef_
 {
     GPIO_TypeDef    *Port;
     uint32_t        Pin;
-    bool            Pin_State;
     PWM_TypeDef     *PWM;
+    bool            is_on;
 }V_Switch_typdef;
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

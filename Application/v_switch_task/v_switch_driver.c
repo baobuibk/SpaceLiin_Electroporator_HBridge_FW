@@ -37,7 +37,7 @@ V_Switch_typdef V_Switch_HV =
     .Pin                = V_SWITCH_HIN1_PIN,
     .Pin_State          = 0,
     .PWM                = &V_Switch_HV_PWM,
-    //.Mode               = H_BRIDGE_MODE_LS_ON,
+    .is_on              = false,
 };
 
 V_Switch_typdef V_Switch_LV =
@@ -46,7 +46,7 @@ V_Switch_typdef V_Switch_LV =
     .Pin                = V_SWITCH_HIN2_PIN,
     .Pin_State          = 0,
     .PWM                = &V_Switch_LV_PWM,
-    //.Mode               = H_BRIDGE_MODE_LS_ON,
+    .is_on              = false,
 };
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -81,23 +81,33 @@ void V_Switch_Set_Mode(V_Switch_mode SetMode)
     switch (SetMode)
     {
     case V_SWITCH_MODE_HV_ON:
+        if (V_Switch_HV.is_on == true)
+            break;
+
         LL_TIM_OC_SetMode(V_Switch_LV.PWM->TIMx, V_Switch_LV.PWM->Channel, LL_TIM_OCMODE_FORCED_INACTIVE);
         LL_GPIO_ResetOutputPin(V_Switch_LV.Port, V_Switch_LV.Pin);
+        V_Switch_LV.is_on = false;
 
         LL_TIM_OC_SetMode(V_Switch_HV.PWM->TIMx, V_Switch_HV.PWM->Channel, LL_TIM_OCMODE_PWM2);
         VS_Set_Freq(V_Switch_HV.PWM, 5000, 0);
         VS_Set_Duty(V_Switch_HV.PWM, 50, 0);
         LL_GPIO_SetOutputPin(V_Switch_HV.Port, V_Switch_HV.Pin);
+        V_Switch_HV.is_on = true;
 
         break;
     case V_SWITCH_MODE_LV_ON:
+        if (V_Switch_LV.is_on == true)
+            break;
+
         LL_TIM_OC_SetMode(V_Switch_HV.PWM->TIMx, V_Switch_HV.PWM->Channel, LL_TIM_OCMODE_FORCED_INACTIVE);
         LL_GPIO_ResetOutputPin(V_Switch_HV.Port, V_Switch_HV.Pin);
+        V_Switch_HV.is_on = false;
 
         LL_TIM_OC_SetMode(V_Switch_LV.PWM->TIMx, V_Switch_LV.PWM->Channel, LL_TIM_OCMODE_PWM2);
         VS_Set_Freq(V_Switch_LV.PWM, 5000, 0);
         VS_Set_Duty(V_Switch_LV.PWM, 50, 0);
         LL_GPIO_SetOutputPin(V_Switch_LV.Port, V_Switch_LV.Pin);
+        V_Switch_LV.is_on = true;
 
         break;
     case V_SWITCH_MODE_ALL_OFF:
