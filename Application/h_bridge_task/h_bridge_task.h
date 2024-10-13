@@ -10,7 +10,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern bool                     is_h_bridge_enable;
 
-extern uint8_t                  pulse_delay_ms;
+extern uint16_t                 pulse_delay_ms;
 
 extern uint8_t                  hv_pulse_pos_count;
 extern uint8_t                  hv_pulse_neg_count;

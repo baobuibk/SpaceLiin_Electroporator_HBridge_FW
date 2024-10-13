@@ -27,7 +27,7 @@ H_Bridge_State_typedef H_Bridge_State = H_BRIDGE_STOP_STATE;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 bool        is_h_bridge_enable          = false;
 
-uint8_t     pulse_delay_ms              = 2;
+uint16_t    pulse_delay_ms              = 2;
 
 uint8_t     hv_pulse_pos_count          = 0;
 uint8_t     hv_pulse_neg_count          = 0;

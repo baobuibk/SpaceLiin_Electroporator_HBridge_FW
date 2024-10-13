@@ -45,12 +45,12 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
                     },
 					{
-										      &BMP390_Task,
-										      (void *) 0,
-										     10000,                         //call every 1ms
-										     0,                          //count from start
-										     true                        //is active
-										        },
+                            &BMP390_Task,
+                            (void *) 0,
+                            10000,                      //call every 1ms
+                            0,                          //count from start
+                            true                        //is active
+                    },
                 };
 
 void App_Main(void)

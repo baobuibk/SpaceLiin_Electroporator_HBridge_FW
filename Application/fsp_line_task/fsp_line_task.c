@@ -188,7 +188,7 @@ void FSP_Line_Process() {
 
 			pulse_delay_ms = pu_GPC_FSP_Payload->pulseDelay.Delay_high;
 			pulse_delay_ms <<= 8;
-			pulse_delay_ms = pu_GPC_FSP_Payload->pulseDelay.Delay_low;
+			pulse_delay_ms |= pu_GPC_FSP_Payload->pulseDelay.Delay_low;
 			break;
 		case FSP_CMD_PULSE_HV:
 			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_HV\r\n");
