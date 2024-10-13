@@ -75,13 +75,51 @@ void H_Bridge_Task(void*)
         }
         else if(is_h_bridge_enable == true)
         {
-            V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+            if (hv_pulse_pos_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
 
-            H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-            H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_pos_count);
-            H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_pos_count);
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
-            H_Bridge_State = H_BRIDGE_HV_1_STATE;
+                H_Bridge_State = H_BRIDGE_HV_1_STATE;
+            }
+            else if (hv_pulse_neg_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
+
+                H_Bridge_State = H_BRDIGE_HV_2_STATE;
+            }
+            else if (lv_pulse_pos_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
+
+                H_Bridge_State = H_BRIDGE_LV_1_STATE;
+            }
+            else if (lv_pulse_neg_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+            
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
+
+                H_Bridge_State = H_BRIDGE_LV_2_STATE;
+            }
+            else
+            {
+                is_h_bridge_enable = false;
+                H_Bridge_State = H_BRIDGE_STOP_STATE;
+            }
         }
         break;
     case H_BRIDGE_HV_1_STATE:
@@ -91,13 +129,41 @@ void H_Bridge_Task(void*)
         }
         else if(H_Bridge_1.pulse_count >= (H_Bridge_1.set_pulse_count * 2))
         {
-            V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+            if (hv_pulse_neg_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
 
-            H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-            H_Bridge_Set_Pulse_Timing(&H_Bridge_2, hv_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
-            H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, hv_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
-            H_Bridge_State = H_BRDIGE_HV_2_STATE;
+                H_Bridge_State = H_BRDIGE_HV_2_STATE;
+            }
+            else if (lv_pulse_pos_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
+
+                H_Bridge_State = H_BRIDGE_LV_1_STATE;
+            }
+            else if (lv_pulse_neg_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+            
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
+
+                H_Bridge_State = H_BRIDGE_LV_2_STATE;
+            }
+            else
+            {
+                is_h_bridge_enable = false;
+                H_Bridge_State = H_BRIDGE_STOP_STATE;
+            }
         }
         break;
     case H_BRDIGE_HV_2_STATE:
@@ -107,13 +173,31 @@ void H_Bridge_Task(void*)
         }
         else if(H_Bridge_2.pulse_count >= (H_Bridge_2.set_pulse_count * 2))
         {
-            V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+            if (lv_pulse_pos_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
 
-            H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-            H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
-            H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
-            H_Bridge_State = H_BRIDGE_LV_1_STATE;
+                H_Bridge_State = H_BRIDGE_LV_1_STATE;
+            }
+            else if (lv_pulse_neg_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+            
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
+
+                H_Bridge_State = H_BRIDGE_LV_2_STATE;
+            }
+            else
+            {
+                is_h_bridge_enable = false;
+                H_Bridge_State = H_BRIDGE_STOP_STATE;
+            }
         }
         break;
     case H_BRIDGE_LV_1_STATE:
@@ -123,13 +207,21 @@ void H_Bridge_Task(void*)
         }
         else if(H_Bridge_1.pulse_count >= (H_Bridge_1.set_pulse_count * 2))
         {
-            V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+            if (lv_pulse_neg_count != 0)
+            {
+                V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
             
-            H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-            H_Bridge_Set_Pulse_Timing(&H_Bridge_2, lv_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
-            H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
+                H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, lv_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
-            H_Bridge_State = H_BRIDGE_LV_2_STATE;
+                H_Bridge_State = H_BRIDGE_LV_2_STATE;
+            }
+            else
+            {
+                is_h_bridge_enable = false;
+                H_Bridge_State = H_BRIDGE_STOP_STATE;
+            }
         }
         break;
     case H_BRIDGE_LV_2_STATE:

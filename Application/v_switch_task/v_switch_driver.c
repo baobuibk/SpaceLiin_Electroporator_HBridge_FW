@@ -35,7 +35,7 @@ V_Switch_typdef V_Switch_HV =
 {
     .Port               = V_SWITCH_HIN1_PORT,
     .Pin                = V_SWITCH_HIN1_PIN,
-    .Pin_State          = 0,
+    .is_on              = 0,
     .PWM                = &V_Switch_HV_PWM,
     .is_on              = false,
 };
@@ -44,7 +44,7 @@ V_Switch_typdef V_Switch_LV =
 {
     .Port               = V_SWITCH_HIN2_PORT,
     .Pin                = V_SWITCH_HIN2_PIN,
-    .Pin_State          = 0,
+    .is_on              = 0,
     .PWM                = &V_Switch_LV_PWM,
     .is_on              = false,
 };
