@@ -113,9 +113,11 @@ void V_Switch_Set_Mode(V_Switch_mode SetMode)
     case V_SWITCH_MODE_ALL_OFF:
         LL_TIM_OC_SetMode(V_Switch_LV.PWM->TIMx, V_Switch_LV.PWM->Channel, LL_TIM_OCMODE_FORCED_INACTIVE);
         LL_GPIO_ResetOutputPin(V_Switch_LV.Port, V_Switch_LV.Pin);
+        V_Switch_LV.is_on = false;
 
         LL_TIM_OC_SetMode(V_Switch_HV.PWM->TIMx, V_Switch_HV.PWM->Channel, LL_TIM_OCMODE_FORCED_INACTIVE);
         LL_GPIO_ResetOutputPin(V_Switch_HV.Port, V_Switch_HV.Pin);
+        V_Switch_HV.is_on = false;
 
         break;
     

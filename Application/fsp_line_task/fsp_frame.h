@@ -13,7 +13,7 @@
 #define FSP_CMD_RELAY_CONTROL           0x07       /**< Stop cuvette. */
 #define FSP_CMD_CHANNEL_SET             0x08
 #define FSP_CMD_CHANNEL_CONTROL         0x09
-#define FSP_CMD_GET_CURRENT				0x0A	//Get current
+#define FSP_CMD_GET_CURRENT				0x0A		//Get current
 #define FSP_CMD_GET_IMPEDANCE			0x0B
 
 // FROM GPP TO GPC
@@ -125,13 +125,11 @@ typedef struct _AVR_CURRENT_FRAME_
 	uint8_t 	Value_high;
 	uint8_t 	Value_low;
 } AVR_CURRENT_FRAME;
+
 typedef struct _GET_BMP390_ {
 	uint8_t Cmd;
 	uint8_t temp[5];
 	uint8_t pressure[6];
-
-
-
 } GET_BMP390;
 
 // Union to encapsulate all frame types

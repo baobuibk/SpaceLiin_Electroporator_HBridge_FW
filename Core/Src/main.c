@@ -205,6 +205,10 @@ static void MX_ADC_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /* ADC interrupt Init */
+  NVIC_SetPriority(ADC1_IRQn, 3);
+  NVIC_EnableIRQ(ADC1_IRQn);
+
   /* USER CODE BEGIN ADC_Init 1 */
 
   /* USER CODE END ADC_Init 1 */

@@ -70,7 +70,7 @@ void Impedance_Task(void*)
     case IMPEDANCE_STOP_STATE:
     if (is_impedance_task_enable == true)
     {
-        V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
+        V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
         H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
         H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_HS_ON);
 
@@ -79,13 +79,12 @@ void Impedance_Task(void*)
         Impedance_State = IMPEDANCE_MEASURE_STATE;
         LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
     }
-    
         break;
     case IMPEDANCE_MEASURE_STATE:
-        uint16_t ADC_Value = 0;
-        
         if (is_ADC_read_completed == true)
         {
+            uint16_t ADC_Value = 0;
+
             Impedance_Measure_Count++;
             is_ADC_read_completed = false;
             ADC_Value = LL_ADC_REG_ReadConversionData12(ADC_I_SENSE_HANDLE);
@@ -129,7 +128,7 @@ void Impedance_Task(void*)
         break;
 
     default:
-        Impedance_State = IMPEDANCE_STOP_STATE;
+        
         break;
     }
 }
