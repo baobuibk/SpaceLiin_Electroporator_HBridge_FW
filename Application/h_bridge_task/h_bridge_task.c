@@ -23,6 +23,10 @@ typedef enum
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 H_Bridge_State_typedef H_Bridge_State = H_BRIDGE_STOP_STATE;
 
+static uint16_t static_pulse_delay_ms;
+static uint16_t static_hv_delay_ms;
+static uint16_t static_lv_delay_ms; 
+
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 bool        is_h_bridge_enable          = false;
@@ -75,12 +79,16 @@ void H_Bridge_Task(void*)
         }
         else if(is_h_bridge_enable == true)
         {
+            static_pulse_delay_ms   = pulse_delay_ms + hv_off_time_ms;
+            static_hv_delay_ms      = hv_delay_ms + hv_off_time_ms;
+            static_lv_delay_ms      = lv_delay_ms + lv_off_time_ms;
+        
             if (hv_pulse_pos_count != 0)
             {
                 V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
 
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_pos_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, 1, hv_on_time_ms, hv_off_time_ms, hv_pulse_pos_count);
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_HV_1_STATE;
@@ -90,7 +98,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
 
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, 1, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRDIGE_HV_2_STATE;
@@ -100,7 +108,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
 
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, 1, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_1_STATE;
@@ -110,7 +118,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
             
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, 1, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_2_STATE;
@@ -134,7 +142,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
 
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, hv_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, static_hv_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_neg_count);
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRDIGE_HV_2_STATE;
@@ -144,7 +152,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
 
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, static_pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_1_STATE;
@@ -154,7 +162,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
             
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, static_pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_2_STATE;
@@ -178,7 +186,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
 
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_1, static_pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_pos_count);
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_1_STATE;
@@ -188,7 +196,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
             
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, static_pulse_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_2_STATE;
@@ -212,7 +220,7 @@ void H_Bridge_Task(void*)
                 V_Switch_Set_Mode(V_SWITCH_MODE_LV_ON);
             
                 H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_LS_ON);
-                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, lv_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
+                H_Bridge_Set_Pulse_Timing(&H_Bridge_2, static_lv_delay_ms, lv_on_time_ms, lv_off_time_ms, lv_pulse_neg_count);
                 H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_PULSE);
 
                 H_Bridge_State = H_BRIDGE_LV_2_STATE;
@@ -235,7 +243,7 @@ void H_Bridge_Task(void*)
             V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
 
             H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-            H_Bridge_Set_Pulse_Timing(&H_Bridge_1, pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_count);
+            H_Bridge_Set_Pulse_Timing(&H_Bridge_1, static_pulse_delay_ms, hv_on_time_ms, hv_off_time_ms, hv_pulse_count);
             H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_PULSE);
 
             H_Bridge_State = H_BRIDGE_HV_1_STATE;
