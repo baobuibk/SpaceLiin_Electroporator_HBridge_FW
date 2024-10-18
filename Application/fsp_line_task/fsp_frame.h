@@ -18,8 +18,9 @@
 
 // FROM GPP TO GPC
 #define FSP_CMD_HANDSHAKE				0x0C
-#define FSP_CMD_AVR_CURRENT				0x0D
-#define FSP_CMD_GET_BMP390				0x0E
+#define FSP_CMD_SENT_CURRENT			0x0D
+#define FSP_CMD_SENT_IMPEDANCE			0x0E
+#define FSP_CMD_GET_BMP390				0x0F
 
 typedef struct _COMMON_FRAME_
 {
@@ -113,18 +114,19 @@ typedef struct _COMMON_RESPONSE_FRAME_
 	uint8_t Cmd;            /* The command class */
 } COMMON_RESPONSE_FRAME;
 
-typedef struct _CURRENT_RESPONSE_FRAME_
-{
-	uint8_t 	Cmd;
-	uint8_t 	Current;
-} CURRENT_RESPONSE_FRAME;
-
-typedef struct _AVR_CURRENT_FRAME_
+typedef struct _GET_CURRENT_FRAME_
 {
 	uint8_t 	Cmd;
 	uint8_t 	Value_high;
 	uint8_t 	Value_low;
-} AVR_CURRENT_FRAME;
+} GET_CURRENT_FRAME;
+
+typedef struct _GET_IMPEDANCE_FRAME_
+{
+	uint8_t 	Cmd;
+	uint8_t 	Value_high;
+	uint8_t 	Value_low;
+} GET_IMPEDANCE_FRAME;
 
 typedef struct _GET_BMP390_ {
 	uint8_t Cmd;
@@ -151,9 +153,9 @@ typedef union _GPC_FSP_Payload_ {
 
 typedef union _GPP_FSP_Payload_ {
 	COMMON_RESPONSE_FRAME					commonFrame;
-	CURRENT_RESPONSE_FRAME					currentResponse;
 	FSP_HANDSAKE							handshake;
-	AVR_CURRENT_FRAME						avr_current;
+	GET_CURRENT_FRAME						get_current;
+	GET_IMPEDANCE_FRAME						get_impedance;
 	GET_BMP390								getBMP390;
 } GPP_FSP_Payload;
 

@@ -235,15 +235,25 @@ void FSP_Line_Process() {
 			break;
 
 		case FSP_CMD_GET_CURRENT:
-
+			UART_Send_String(&RS232_UART, "Received FSP_CMD_GET_CURRENT\r\n");
+			Current_Sense_Period = 1000;
+			LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
+			SchedulerTaskEnable(2, 1);
 			break;
 
 		case FSP_CMD_GET_IMPEDANCE:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_CHANNEL_CONTROL\r\n");
-			Impedance_Measure_Period = pu_GPC_FSP_Payload->get_impedance.Period * 1000;
-			is_h_bridge_enable = false;
-			is_impedance_task_enable = true;
-			SchedulerTaskEnable(3, 1);
+			UART_Send_String(&RS232_UART, "Received FSP_CMD_GET_IMPEDANCE\r\n");
+			Current_Sense_Period	= pu_GPC_FSP_Payload->get_impedance.Period * 1000;
+			is_h_bridge_enable 		= false;
+			is_Measure_Impedance 	= true;
+
+			V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+        	H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
+        	H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_HS_ON);
+
+			LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
+
+			SchedulerTaskEnable(2, 1);
 			break;
 
 		case FSP_CMD_HANDSHAKE:
@@ -265,30 +275,30 @@ void FSP_Line_Process() {
 			UART_FSP(&GPC_UART, (char*)encoded_frame, frame_len);
 			break;
 		case FSP_CMD_GET_BMP390:
-					UART_Send_String(&RS232_UART, "Received BMP_390 command\r\n");
-					pu_GPP_FSP_Payload->getBMP390.Cmd = FSP_CMD_GET_BMP390	;
-					float temp = (float)compensated_temperature;
-					uint32_t press= (uint32_t)compensated_pressure;
+			UART_Send_String(&RS232_UART, "Received BMP_390 command\r\n");
+			pu_GPP_FSP_Payload->getBMP390.Cmd = FSP_CMD_GET_BMP390	;
+			float temp = (float)compensated_temperature;
+			uint32_t press= (uint32_t)compensated_pressure;
 
-					convertTemperature(temp, pu_GPP_FSP_Payload->getBMP390.temp);
+			convertTemperature(temp, pu_GPP_FSP_Payload->getBMP390.temp);
 
-					sprintf(pu_GPP_FSP_Payload->getBMP390.pressure, "%d", press);
+			sprintf(pu_GPP_FSP_Payload->getBMP390.pressure, "%d", press);
 
-					s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
-					s_GPP_FSP_Packet.src_adr = fsp_my_adr;
-					s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
-					s_GPP_FSP_Packet.length = 12;
-					s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
-					s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
-					s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
-									&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+			s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
+			s_GPP_FSP_Packet.src_adr = fsp_my_adr;
+			s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
+			s_GPP_FSP_Packet.length = 12;
+			s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
+			s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
+			s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
+							&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
 
-					uint8_t encoded_frame1[20] = { 0 };
-					uint8_t frame_len1;
-					fsp_encode(&s_GPP_FSP_Packet, encoded_frame1, &frame_len1);
+			uint8_t encoded_frame1[20] = { 0 };
+			uint8_t frame_len1;
+			fsp_encode(&s_GPP_FSP_Packet, encoded_frame1, &frame_len1);
 
-					UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
-					break;
+			UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
+			break;
 		default:
 			break;
 		}
