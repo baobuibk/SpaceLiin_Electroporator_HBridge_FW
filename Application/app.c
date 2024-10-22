@@ -16,6 +16,13 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
                     },
                     {
+                            &CMD_Line_Task,
+                            (void *) 0,
+                            10,                         //call every 1ms
+                            0,                          //count from start
+                            true                        //is active
+                    },
+                    {
                             &FSP_Line_Task,
                             (void *) 0,
                             20,                         //call every 1ms
@@ -42,15 +49,8 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             (void *) 0,
                             10000,                      //call every 1ms
                             0,                          //count from start
-                            true                      //is active
+                            true                        //is active
                     },
-					{
-					                            &CMD_Line_Task,
-					                            (void *) 0,
-					                            10,                      //call every 1ms
-					                            0,                          //count from start
-					                            true                        //is active
-					                    },
                 };
 
 void App_Main(void)

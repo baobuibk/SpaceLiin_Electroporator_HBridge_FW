@@ -299,37 +299,35 @@ void FSP_Line_Process() {
 			uint8_t frame_len1;
 			fsp_encode(&s_GPP_FSP_Packet, encoded_frame1, &frame_len1);
 
-					UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
-					break;
+			UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
+			break;
 		case FSP_CMD_GET_LSMDOX:
-							UART_Send_String(&RS232_UART, "Received GET_LSMDOX command\r\n");
-							pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LSMDOX	;
+			UART_Send_String(&RS232_UART, "Received GET_LSMDOX command\r\n");
+			pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LSMDOX	;
 
-							convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
-							convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
-							convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
+			convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
+			convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
+			convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
 
+			convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
+			convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
+			convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
 
-							convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
-							convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
-							convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
+			s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
+			s_GPP_FSP_Packet.src_adr = fsp_my_adr;
+			s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
+			s_GPP_FSP_Packet.length = 25;
+			s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
+			s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
+			s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
+							&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
 
+			uint8_t encoded_frame2[40] = { 0 };
+			uint8_t frame_len2;
+			fsp_encode(&s_GPP_FSP_Packet, encoded_frame2, &frame_len2);
 
-							s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
-							s_GPP_FSP_Packet.src_adr = fsp_my_adr;
-							s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
-							s_GPP_FSP_Packet.length = 25;
-							s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
-							s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
-							s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
-											&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
-
-							uint8_t encoded_frame2[40] = { 0 };
-							uint8_t frame_len2;
-							fsp_encode(&s_GPP_FSP_Packet, encoded_frame2, &frame_len2);
-
-							UART_FSP(&GPC_UART, encoded_frame2, frame_len2);
-							break;
+			UART_FSP(&GPC_UART, encoded_frame2, frame_len2);
+			break;
 		default:
 			break;
 		}

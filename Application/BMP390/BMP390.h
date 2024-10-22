@@ -62,6 +62,6 @@ typedef struct _Accel_Gyro_DataTypedef_
 	int z;
 } Accel_Gyro_DataTypedef;
 void BMP390_init();
-void BMP390_Task() ;
+void BMP390_Task(void*) ;
 
 #endif /* BMP390_BMP390_H_ */
