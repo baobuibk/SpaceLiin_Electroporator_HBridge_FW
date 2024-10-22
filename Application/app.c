@@ -42,7 +42,7 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             (void *) 0,
                             10000,                      //call every 1ms
                             0,                          //count from start
-                            false                        //is active
+                            true                      //is active
                     },
 					{
 					                            &CMD_Line_Task,
@@ -65,10 +65,7 @@ void App_Main(void)
     FSP_Line_Task_Init();
     CMD_Line_Task_Init();
     BMP390_init();
-    start(0xD4, 0);
-    write(0x0f);
-    start(0xD4,1);
-    uint8_t temp = read();
+
     while (1)
     {
         SchedulerRun();
