@@ -4,7 +4,7 @@
 
 static void Status_Led(void*);
 
-#define         SCHEDULER_TASK_COUNT  7
+#define         SCHEDULER_TASK_COUNT  6
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
 tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                 {
@@ -24,14 +24,7 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
 
                     },
                     {
-                            &ADC_Task,
-                            (void *) 0,
-                            10,                         //call every 1ms
-                            0,                          //count from start
-                            false                       //is active
-                    },
-                    {
-                            &Impedance_Task,
+                            &Current_Sense_Task,
                             (void *) 0,
                             10,                         //call every 1ms
                             0,                          //count from start
@@ -66,7 +59,7 @@ void App_Main(void)
     // can run scheduler tick max @ 100us.
     SchedulerInit(10000);
 
-    ADC_Task_Init(LL_ADC_SAMPLINGTIME_7CYCLES_5);
+    Current_Sense_Task_Init(LL_ADC_SAMPLINGTIME_7CYCLES_5);
     H_Bridge_Driver_Init();
     V_Switch_Driver_Init();
     FSP_Line_Task_Init();

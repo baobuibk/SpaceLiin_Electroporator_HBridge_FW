@@ -22,6 +22,7 @@
 #include "i2c/i2c.h"
 // INCLUDE DRIVER //
 #include "h_bridge_driver.h"
+#include "v_switch_driver.h"
 
 // INCLUDE LIB //
 #include "uart.h"
