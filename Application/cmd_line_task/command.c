@@ -25,7 +25,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern uart_stdio_typedef  RS232_UART;
 extern uart_stdio_typedef  GPP_UART;
-
+extern Accel_Gyro_DataTypedef _gyro, _accel;
 extern PWM_TypeDef H_Bridge_1_PWM;
 extern PWM_TypeDef H_Bridge_2_PWM;
 
@@ -41,6 +41,7 @@ tCmdLineEntry g_psCmdTable[] =
     { "RELAY_CONTROL",      CMD_RELAY_CONTROL,  "Stop cuvette" },
     { "CHANNEL_SET",        CMD_CHANNEL_SET,    "Choose a cap channel"},
     { "CHANNEL_CONTROL",    CMD_CHANNEL_CONTROL,"Control the setted channel"},
+	{ "PRINT_SENSOR",    CMD_PRINT_SENSOR,    "print the sensor value"},
 	{0,0,0}
 };
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Function ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -323,4 +324,10 @@ void decode_hs_relay(uint8_t cuvette_code)
     {
         LL_GPIO_ResetOutputPin(DECOD_HS2_PORT, DECOD_HS2_PIN);
     }
+}
+int CMD_PRINT_SENSOR(int argc, char *argv[]) {
+
+	UART_Printf(&RS232_UART, "gyro X: %d, Y: %d, Z: %d\r\n", _gyro.x, _gyro.y, _gyro.z);
+	UART_Printf(&RS232_UART, "accel X: %d, Y: %d, Z: %d\r\n", _accel.x, _accel.y, _accel.z);
+	return CMDLINE_OK;
 }

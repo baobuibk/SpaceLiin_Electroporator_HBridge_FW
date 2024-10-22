@@ -52,6 +52,15 @@ typedef struct _data_ {
 	compensated_data compensatedData;
 	double t_lin;
 } data;
+#define GYRO_SENSITIVITY_500DPS		17.50f
+#define LSM6DSOX_ACCL_FS_8G			0.244f
+
+typedef struct _Accel_Gyro_DataTypedef_
+{
+	int x;
+	int y;
+	int z;
+} Accel_Gyro_DataTypedef;
 void BMP390_init();
 void BMP390_Task() ;
 

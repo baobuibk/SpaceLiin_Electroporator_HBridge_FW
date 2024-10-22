@@ -11,14 +11,17 @@
 static uint8_t read_uncompensated_value(uint32_t *pressure, uint32_t *temperature) ;
 static double BMP309_temperature_compensate(uint32_t uncomp_temp, data *pBMP_data);
 static double BMP_pressure_compensate(uint32_t uncomp_pressure, data *pBMP_data);
+int16_t combine(uint8_t x, uint8_t y);
 static float BMP390_GetAlt(void);
 extern I2C_HandleTypeDef hi2c2;
 static data BMP_data;
 static uint8_t buffer[100];
+static uint8_t buffer1[20];
 uint32_t raw_temperature;
 uint32_t raw_pressure;
 double compensated_pressure;
 double compensated_temperature;
+Accel_Gyro_DataTypedef _gyro, _accel;
 float altitudeValue;
 static uint8_t read_uncompensated_value(uint32_t *pressure, uint32_t *temperature) {
 	uint8_t status;
@@ -112,10 +115,13 @@ void BMP390_init() {
 
 	 BMP_data.compensatedData.PAR_P11 = ((double)(BMP_data.uncompensatedData.NVM_PAR_P11)/temp_var);
 
+	//init LMD6 (0xD4 address)
+	 HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x0f, 1, buffer1 , 1 , 100);
+	 buffer1[0] = 0x58;
+	HAL_I2C_Mem_Write(&hi2c2, 0xD4, 0x10, 1, buffer1 , 1 , 100);
 
-
-
-
+	 buffer1[0] = 0x54;
+	HAL_I2C_Mem_Write(&hi2c2, 0xD4, 0x11, 1, buffer1 , 1 , 100);
 }
 static double BMP309_temperature_compensate(uint32_t uncomp_temp, data *pBMP_data) {
 	double partial_data1;
@@ -183,8 +189,28 @@ void BMP390_Task(void *) {
 		compensated_pressure = BMP_pressure_compensate(raw_pressure, &BMP_data);
 		altitudeValue= BMP390_GetAlt();
 	}
-}
+	//2
+	HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x1E, 1, buffer1 , 1 , 100);
+	if ((buffer1[0] & (1<<0)) &&( buffer1[0] & (1<<1))) {       //if new data available
 
+
+
+
+	HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x22, 1, buffer1 , 12 , 100);
+	_gyro.x = (int)(combine(buffer1[1], buffer1[0]))* GYRO_SENSITIVITY_500DPS ;
+	_gyro.y = (int)(combine(buffer1[3], buffer1[2])) * GYRO_SENSITIVITY_500DPS;
+	_gyro.z = (int)(combine(buffer1[5], buffer1[4])) * GYRO_SENSITIVITY_500DPS;
+	_accel.x =(int)(combine(buffer1[7], buffer1[6])) * LSM6DSOX_ACCL_FS_8G;
+	_accel.y = (int)(combine(buffer1[9], buffer1[8]))  * LSM6DSOX_ACCL_FS_8G;
+	_accel.z = (int)(combine(buffer1[11], buffer1[10]))* LSM6DSOX_ACCL_FS_8G;
+
+	}
+}
+int16_t combine(uint8_t x, uint8_t y) {
+
+	return (x<<8) | y;
+
+}
 
 
 

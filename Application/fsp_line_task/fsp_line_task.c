@@ -15,7 +15,9 @@ struct _fsp_line_typedef {
 	volatile uint16_t write_index;
 	volatile char RX_char;
 };
+extern Accel_Gyro_DataTypedef _gyro, _accel;
 void convertTemperature(float temp, uint8_t buf[]);
+void convertIntegerToBytes(int number, uint8_t arr[]);
 typedef struct _fsp_line_typedef fsp_line_typedef;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 //static const char * ErrorCode[7] =
@@ -266,7 +268,7 @@ void FSP_Line_Process() {
 			break;
 		case FSP_CMD_GET_BMP390:
 					UART_Send_String(&RS232_UART, "Received BMP_390 command\r\n");
-					pu_GPP_FSP_Payload->getBMP390.Cmd = FSP_CMD_GET_BMP390	;
+					pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_BMP390	;
 					float temp = (float)compensated_temperature;
 					uint32_t press= (uint32_t)compensated_pressure;
 
@@ -289,6 +291,35 @@ void FSP_Line_Process() {
 
 					UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
 					break;
+		case FSP_CMD_GET_LSMDOX:
+							UART_Send_String(&RS232_UART, "Received GET_LSMDOX command\r\n");
+							pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LSMDOX	;
+
+							convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
+							convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
+							convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
+
+
+							convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
+							convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
+							convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
+
+
+							s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
+							s_GPP_FSP_Packet.src_adr = fsp_my_adr;
+							s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
+							s_GPP_FSP_Packet.length = 25;
+							s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
+							s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
+							s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
+											&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+
+							uint8_t encoded_frame2[40] = { 0 };
+							uint8_t frame_len2;
+							fsp_encode(&s_GPP_FSP_Packet, encoded_frame2, &frame_len2);
+
+							UART_FSP(&GPC_UART, encoded_frame2, frame_len2);
+							break;
 		default:
 			break;
 		}
@@ -309,6 +340,13 @@ void convertTemperature(float temp, uint8_t buf[]) {
 	//float to byte
 
 	gcvt(temp, 5, buf);
+
+}
+void convertIntegerToBytes(int number, uint8_t arr[]) {
+	arr[0]= number & 0xff;
+	arr[1]= (number >>8 ) & 0xff;
+	arr[2] = (number >>16) & 0xff;
+	arr[3] = (number >>24) & 0xff;
 
 }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

@@ -20,7 +20,7 @@
 #define FSP_CMD_HANDSHAKE				0x0C
 #define FSP_CMD_AVR_CURRENT				0x0D
 #define FSP_CMD_GET_BMP390				0x0E
-
+#define FSP_CMD_GET_LSMDOX				0x10
 typedef struct _COMMON_FRAME_
 {
 	uint8_t Cmd;
@@ -131,7 +131,16 @@ typedef struct _GET_BMP390_ {
 	uint8_t temp[5];
 	uint8_t pressure[6];
 } GET_BMP390;
+typedef struct _GET_LSMDOX_ {
+	uint8_t Cmd;
+	uint8_t accel_x[4];
+	uint8_t accel_y[4];
+	uint8_t accel_z[4];
+	uint8_t gyro_x[4];
+	uint8_t gyro_y[4];
+	uint8_t gyro_z[4];
 
+} GET_LSMDOX;
 // Union to encapsulate all frame types
 typedef union _GPC_FSP_Payload_ {
 	COMMON_FRAME							commonFrame;
@@ -155,6 +164,7 @@ typedef union _GPP_FSP_Payload_ {
 	FSP_HANDSAKE							handshake;
 	AVR_CURRENT_FRAME						avr_current;
 	GET_BMP390								getBMP390;
+	GET_LSMDOX								getLSMDOX;
 } GPP_FSP_Payload;
 
 
