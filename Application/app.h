@@ -19,7 +19,7 @@
 #include "fsp_line_task.h"
 #include "impedance_task.h"
 #include "BMP390.h"
-
+#include "i2c/i2c.h"
 // INCLUDE DRIVER //
 #include "h_bridge_driver.h"
 #include "v_switch_driver.h"

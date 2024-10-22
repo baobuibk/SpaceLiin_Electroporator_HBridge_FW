@@ -28,7 +28,7 @@ int CMD_CHANNEL_CONTROL(int argc, char *argv[]);
 
 void decode_ls_relay(uint8_t cuvette_code);
 void decode_hs_relay(uint8_t cuvette_code);
-
+int CMD_PRINT_SENSOR(int argc, char *argv[]);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #endif /* COMMAND_H_ */
