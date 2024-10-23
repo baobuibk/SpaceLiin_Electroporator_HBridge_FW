@@ -297,7 +297,7 @@ void decode_hs_relay(uint8_t cuvette_code)
     {
         cuvette_code -= 2;
     }
-    
+
     if ((cuvette_code & 0b001) == 0b001)
     {
         LL_GPIO_SetOutputPin(DECOD_HS0_PORT, DECOD_HS0_PIN);

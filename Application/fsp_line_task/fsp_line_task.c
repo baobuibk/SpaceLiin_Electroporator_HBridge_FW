@@ -31,6 +31,7 @@ typedef struct _fsp_line_typedef fsp_line_typedef;
 //    "FSP_PKT_WRONG_LENGTH\n"
 //};
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Prototype ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+static void fsp_print(uint8_t packet_length);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Public Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 extern uart_stdio_typedef RS232_UART;
 uart_stdio_typedef GPC_UART;
@@ -153,194 +154,258 @@ void GPC_UART_IRQHandler(void) {
 	}
 }
 
-void FSP_Line_Process() {
-	switch (s_GPC_FSP_Packet.type) {
-	case FSP_PKT_TYPE_DATA:
+uint8_t hs_relay_pole, ls_relay_pole, relay_state;
+void FSP_Line_Process()
+{
+	switch (pu_GPC_FSP_Payload->commonFrame.Cmd)
+	{
+	case FSP_CMD_SET_PULSE_COUNT:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_COUNT\r\n");
+		hv_pulse_pos_count 	= pu_GPC_FSP_Payload->set_pulse_count.HV_pos_count;
+		hv_pulse_neg_count 	= pu_GPC_FSP_Payload->set_pulse_count.HV_neg_count;
 
+		lv_pulse_pos_count 	= pu_GPC_FSP_Payload->set_pulse_count.LV_pos_count;
+		lv_pulse_neg_count 	= pu_GPC_FSP_Payload->set_pulse_count.LV_neg_count;
 		break;
-	case FSP_PKT_TYPE_DATA_WITH_ACK:
+	case FSP_CMD_SET_PULSE_DELAY:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_DELAY\r\n");
+		hv_delay_ms = pu_GPC_FSP_Payload->set_pulse_delay.HV_delay;
+		lv_delay_ms	= pu_GPC_FSP_Payload->set_pulse_delay.LV_delay;
 
+		pulse_delay_ms = pu_GPC_FSP_Payload->set_pulse_delay.Delay_high;
+		pulse_delay_ms <<= 8;
+		pulse_delay_ms |= pu_GPC_FSP_Payload->set_pulse_delay.Delay_low;
 		break;
-	case FSP_PKT_TYPE_CMD:
-
+	case FSP_CMD_SET_PULSE_HV:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_HV\r\n");
+		hv_on_time_ms = pu_GPC_FSP_Payload->set_pulse_HV.OnTime;
+		hv_off_time_ms = pu_GPC_FSP_Payload->set_pulse_HV.OffTime;
 		break;
-	case FSP_PKT_TYPE_CMD_WITH_ACK:
+	case FSP_CMD_SET_PULSE_LV:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_LV\r\n");
+		lv_on_time_ms 	= pu_GPC_FSP_Payload->set_pulse_LV.OnTime_high;
+		lv_on_time_ms   <<= 8;
+		lv_on_time_ms	|= pu_GPC_FSP_Payload->set_pulse_LV.OnTime_low;
 
+		lv_off_time_ms	= pu_GPC_FSP_Payload->set_pulse_LV.OffTime_high;
+		lv_off_time_ms	<<= 8;
+		lv_off_time_ms	|= pu_GPC_FSP_Payload->set_pulse_LV.OffTime_low;
 		break;
-	case FSP_PKT_TYPE_ACK:
-
+	case FSP_CMD_SET_PULSE_CONTROL:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_CONTROL\r\n");
+		is_h_bridge_enable = pu_GPC_FSP_Payload->set_pulse_control.State;
+		SchedulerTaskEnable(0, 1);
 		break;
-	case FSP_PKT_TYPE_NACK:
+	
+	case FSP_CMD_GET_PULSE_COUNT:
+		pu_GPP_FSP_Payload->send_pulse_count.Cmd = FSP_CMD_SEND_PULSE_COUNT;
 
+		pu_GPP_FSP_Payload->send_pulse_count.HV_pos_count = hv_pulse_pos_count;
+		pu_GPP_FSP_Payload->send_pulse_count.HV_neg_count = hv_pulse_neg_count;
+
+		pu_GPP_FSP_Payload->send_pulse_count.LV_pos_count = lv_pulse_pos_count;
+		pu_GPP_FSP_Payload->send_pulse_count.LV_neg_count = lv_pulse_neg_count;
+
+		fsp_print(5);
 		break;
-	case FSP_PKT_TYPE_CMD_W_DATA:
-		switch (pu_GPC_FSP_Payload->commonFrame.Cmd) {
-		case FSP_CMD_PULSE_COUNT:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_COUNT\r\n");
-			hv_pulse_pos_count 	= pu_GPC_FSP_Payload->pulseCount.HV_pos_count;
-			hv_pulse_neg_count 	= pu_GPC_FSP_Payload->pulseCount.HV_neg_count;
+	case FSP_CMD_GET_PULSE_DELAY:
+		pu_GPP_FSP_Payload->send_pulse_delay.Cmd = FSP_CMD_SEND_PULSE_DELAY;
 
-			lv_pulse_pos_count 	= pu_GPC_FSP_Payload->pulseCount.LV_pos_count;
-			lv_pulse_neg_count 	= pu_GPC_FSP_Payload->pulseCount.LV_neg_count;
-			break;
-		case FSP_CMD_PULSE_DELAY:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_DELAY\r\n");
-			hv_delay_ms = pu_GPC_FSP_Payload->pulseDelay.HV_delay;
-			lv_delay_ms	= pu_GPC_FSP_Payload->pulseDelay.LV_delay;
+		pu_GPP_FSP_Payload->send_pulse_delay.HV_delay = hv_delay_ms;
+		pu_GPP_FSP_Payload->send_pulse_delay.LV_delay = lv_delay_ms;
 
-			pulse_delay_ms = pu_GPC_FSP_Payload->pulseDelay.Delay_high;
-			pulse_delay_ms <<= 8;
-			pulse_delay_ms |= pu_GPC_FSP_Payload->pulseDelay.Delay_low;
-			break;
-		case FSP_CMD_PULSE_HV:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_HV\r\n");
-			hv_on_time_ms = pu_GPC_FSP_Payload->pulseHV.OnTime;
-			hv_off_time_ms = pu_GPC_FSP_Payload->pulseHV.OffTime;
-			break;
-		case FSP_CMD_PULSE_LV:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_LV\r\n");
-			lv_on_time_ms 	= pu_GPC_FSP_Payload->pulseLV.OnTime_high;
-			lv_on_time_ms   <<= 8;
-			lv_on_time_ms	|= pu_GPC_FSP_Payload->pulseLV.OnTime_low;
+		pu_GPP_FSP_Payload->send_pulse_delay.Delay_low = pulse_delay_ms;
+		pu_GPP_FSP_Payload->send_pulse_delay.Delay_high = pulse_delay_ms >> 8;
 
-			lv_off_time_ms	= pu_GPC_FSP_Payload->pulseLV.OffTime_high;
-			lv_off_time_ms	<<= 8;
-			lv_off_time_ms	|= pu_GPC_FSP_Payload->pulseLV.OffTime_low;
-			break;
-		case FSP_CMD_PULSE_CONTROL:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_PULSE_CONTROL\r\n");
-			is_h_bridge_enable = pu_GPC_FSP_Payload->pulseControl.State;
-			SchedulerTaskEnable(0, 1);
-			break;
-		case FSP_CMD_RELAY_SET:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_RELAY_SET\r\n");
-			decode_hs_relay(pu_GPC_FSP_Payload->relaySet.HvRelay);
-			decode_ls_relay(pu_GPC_FSP_Payload->relaySet.LvRelay);
-			break;
-		case FSP_CMD_RELAY_CONTROL:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_RELAY_CONTROL\r\n");
-			if (pu_GPC_FSP_Payload->relayControl.State == 0) {
-				LL_GPIO_ResetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
-				LL_GPIO_ResetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
-			} else {
-				LL_GPIO_SetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
-				LL_GPIO_SetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
-			}
-			break;
-		case FSP_CMD_CHANNEL_SET:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_CHANNEL_SET\r\n");
-			Channel_Set = pu_GPC_FSP_Payload->channelSet.Channel;
-			break;
-		case FSP_CMD_CHANNEL_CONTROL:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_CHANNEL_CONTROL\r\n");
-			is_v_switch_enable = pu_GPC_FSP_Payload->channelControl.State;
-			break;
+		fsp_print(5);
+		break;
+	case FSP_CMD_GET_PULSE_HV:
+		pu_GPP_FSP_Payload->send_pulse_HV.Cmd = FSP_CMD_SEND_PULSE_HV;
 
-		case FSP_CMD_GET_CURRENT:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_GET_CURRENT\r\n");
-			Current_Sense_Period = 1000;
-			LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
-			SchedulerTaskEnable(2, 1);
-			break;
+		pu_GPP_FSP_Payload->send_pulse_HV.OnTime = hv_on_time_ms;
+		pu_GPP_FSP_Payload->send_pulse_HV.OffTime = hv_off_time_ms;
 
-		case FSP_CMD_GET_IMPEDANCE:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_GET_IMPEDANCE\r\n");
-			Current_Sense_Period	= pu_GPC_FSP_Payload->get_impedance.Period * 1000;
-			is_h_bridge_enable 		= false;
-			is_Measure_Impedance 	= true;
+		fsp_print(3);
+		break;
+	case FSP_CMD_GET_PULSE_LV:
+		pu_GPP_FSP_Payload->send_pulse_LV.Cmd = FSP_CMD_SEND_PULSE_LV;
 
-			V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
-        	H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
-        	H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_HS_ON);
+		pu_GPP_FSP_Payload->send_pulse_LV.OnTime_low = lv_on_time_ms;
+		pu_GPP_FSP_Payload->send_pulse_LV.OnTime_high = lv_on_time_ms >> 8;
 
-			LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
+		pu_GPP_FSP_Payload->send_pulse_LV.OffTime_low = lv_off_time_ms;
+		pu_GPP_FSP_Payload->send_pulse_LV.OffTime_high = lv_off_time_ms >> 8;
 
-			SchedulerTaskEnable(2, 1);
-			break;
+		fsp_print(5);
+		break;
+	case FSP_CMD_GET_PULSE_CONTROL:
+		pu_GPP_FSP_Payload->send_pulse_control.Cmd = FSP_CMD_SEND_PULSE_CONTROL;
 
-		case FSP_CMD_HANDSHAKE:
-			UART_Send_String(&RS232_UART, "Received FSP_CMD_HANDSHAKE\r\n");
-			pu_GPP_FSP_Payload->handshake.Cmd 	= FSP_CMD_HANDSHAKE;
-			pu_GPP_FSP_Payload->handshake.Check = 0xAB;
-			s_GPP_FSP_Packet.sod 		= FSP_PKT_SOD;
-			s_GPP_FSP_Packet.src_adr 	= fsp_my_adr;
-			s_GPP_FSP_Packet.dst_adr 	= FSP_ADR_GPC;
-			s_GPP_FSP_Packet.length 	= 2;
-			s_GPP_FSP_Packet.type 		= FSP_PKT_TYPE_CMD_W_DATA;
-			s_GPP_FSP_Packet.eof 		= FSP_PKT_EOF;
-			s_GPP_FSP_Packet.crc16 		= crc16_CCITT(FSP_CRC16_INITIAL_VALUE, &s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+		pu_GPP_FSP_Payload->send_pulse_control.State = is_h_bridge_enable;
 
-			uint8_t encoded_frame[10] = { 0 };
-			uint8_t frame_len;
-			fsp_encode(&s_GPP_FSP_Packet, encoded_frame, &frame_len);
+		fsp_print(2);
+		break;
+	case FSP_CMD_GET_PULSE_ALL:
+		pu_GPP_FSP_Payload->send_pulse_all.Cmd = FSP_CMD_SEND_PULSE_ALL;
 
-			UART_FSP(&GPC_UART, (char*)encoded_frame, frame_len);
-			break;
-		case FSP_CMD_GET_BMP390:
-			UART_Send_String(&RS232_UART, "Received BMP_390 command\r\n");
-			pu_GPP_FSP_Payload->getBMP390.Cmd = FSP_CMD_GET_BMP390	;
-			float temp = (float)compensated_temperature;
-			uint32_t press= (uint32_t)compensated_pressure;
+		pu_GPP_FSP_Payload->send_pulse_all.HV_pos_count = hv_pulse_pos_count;
+		pu_GPP_FSP_Payload->send_pulse_all.HV_neg_count = hv_pulse_neg_count;
 
-			convertTemperature(temp, pu_GPP_FSP_Payload->getBMP390.temp);
+		pu_GPP_FSP_Payload->send_pulse_all.LV_pos_count = lv_pulse_pos_count;
+		pu_GPP_FSP_Payload->send_pulse_all.LV_neg_count = lv_pulse_neg_count;
 
-			sprintf(pu_GPP_FSP_Payload->getBMP390.pressure, "%d", press);
+		pu_GPP_FSP_Payload->send_pulse_all.HV_delay = hv_delay_ms;
+		pu_GPP_FSP_Payload->send_pulse_all.LV_delay = lv_delay_ms;
 
-			s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
-			s_GPP_FSP_Packet.src_adr = fsp_my_adr;
-			s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
-			s_GPP_FSP_Packet.length = 12;
-			s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
-			s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
-			s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
-							&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+		pu_GPP_FSP_Payload->send_pulse_all.Delay_low = pulse_delay_ms;
+		pu_GPP_FSP_Payload->send_pulse_all.Delay_high = pulse_delay_ms >> 8;
 
-			uint8_t encoded_frame1[20] = { 0 };
-			uint8_t frame_len1;
-			fsp_encode(&s_GPP_FSP_Packet, encoded_frame1, &frame_len1);
+		pu_GPP_FSP_Payload->send_pulse_all.OnTime = hv_on_time_ms;
+		pu_GPP_FSP_Payload->send_pulse_all.OffTime = hv_off_time_ms;
 
-			UART_FSP(&GPC_UART, encoded_frame1, frame_len1);
-			break;
-		case FSP_CMD_GET_LSMDOX:
-			UART_Send_String(&RS232_UART, "Received GET_LSMDOX command\r\n");
-			pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LSMDOX	;
+		pu_GPP_FSP_Payload->send_pulse_all.OnTime_low = lv_on_time_ms;
+		pu_GPP_FSP_Payload->send_pulse_all.OnTime_high = lv_on_time_ms >> 8;
 
-			convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
-			convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
-			convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
+		pu_GPP_FSP_Payload->send_pulse_all.OffTime_low = lv_off_time_ms;
+		pu_GPP_FSP_Payload->send_pulse_all.OffTime_high = lv_off_time_ms >> 8;
 
-			convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
-			convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
-			convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
+		pu_GPP_FSP_Payload->send_pulse_all.State = is_h_bridge_enable;
 
-			s_GPP_FSP_Packet.sod = FSP_PKT_SOD;
-			s_GPP_FSP_Packet.src_adr = fsp_my_adr;
-			s_GPP_FSP_Packet.dst_adr = FSP_ADR_GPC;
-			s_GPP_FSP_Packet.length = 25;
-			s_GPP_FSP_Packet.type = FSP_PKT_TYPE_CMD_W_DATA;
-			s_GPP_FSP_Packet.eof = FSP_PKT_EOF;
-			s_GPP_FSP_Packet.crc16 = crc16_CCITT(FSP_CRC16_INITIAL_VALUE,
-							&s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+		fsp_print(16);
+		break;
 
-			uint8_t encoded_frame2[40] = { 0 };
-			uint8_t frame_len2;
-			fsp_encode(&s_GPP_FSP_Packet, encoded_frame2, &frame_len2);
+	case FSP_CMD_SET_RELAY_POLE:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_RELAY_SET\r\n");
+		hs_relay_pole = pu_GPC_FSP_Payload->set_relay_pole.HvRelay;
+		ls_relay_pole = pu_GPC_FSP_Payload->set_relay_pole.LvRelay;
 
-			UART_FSP(&GPC_UART, encoded_frame2, frame_len2);
-			break;
-		default:
-			break;
+		decode_hs_relay(hs_relay_pole);
+		decode_ls_relay(ls_relay_pole);
+		break;
+	case FSP_CMD_SET_RELAY_CONTROL:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_RELAY_CONTROL\r\n");
+		relay_state = pu_GPC_FSP_Payload->set_relay_control.State;
+
+		if (relay_state == 0) {
+			LL_GPIO_ResetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
+			LL_GPIO_ResetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
+		} else {
+			LL_GPIO_SetOutputPin(DECOD_HS_EN_PORT, DECOD_HS_EN_PIN);
+			LL_GPIO_SetOutputPin(DECOD_LS_EN_PORT, DECOD_LS_EN_PIN);
 		}
 		break;
-	case FSP_PKT_TYPE_CMD_W_DATA_ACK:
 
+	case FSP_CMD_GET_RELAY_POLE:
+		pu_GPP_FSP_Payload->send_relay_pole.Cmd = FSP_CMD_SEND_RELAY_POLE;
+
+		pu_GPP_FSP_Payload->send_relay_pole.HvRelay = hs_relay_pole;
+		pu_GPP_FSP_Payload->send_relay_pole.LvRelay = ls_relay_pole;
+
+		fsp_print(3);
+		break;
+	case FSP_CMD_GET_RELAY_CONTROL:
+		pu_GPP_FSP_Payload->send_relay_control.Cmd = FSP_CMD_SEND_RELAY_CONTROL;
+
+		pu_GPP_FSP_Payload->send_relay_control.State = relay_state;
+
+		fsp_print(2);
+		break;
+	case FSP_CMD_GET_RELAY_ALL:
+		pu_GPP_FSP_Payload->send_relay_all.Cmd = FSP_CMD_SEND_RELAY_ALL;
+
+		pu_GPP_FSP_Payload->send_relay_all.HvRelay = hs_relay_pole;
+		pu_GPP_FSP_Payload->send_relay_all.LvRelay = ls_relay_pole;
+
+		pu_GPP_FSP_Payload->send_relay_all.State = relay_state;
+
+		fsp_print(4);
 		break;
 
+
+	case FSP_CMD_CHANNEL_SET:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_CHANNEL_SET\r\n");
+		Channel_Set = pu_GPC_FSP_Payload->channelSet.Channel;
+		break;
+	case FSP_CMD_CHANNEL_CONTROL:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_CHANNEL_CONTROL\r\n");
+		is_v_switch_enable = pu_GPC_FSP_Payload->channelControl.State;
+		break;
+
+	case FSP_CMD_GET_CURRENT:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_GET_CURRENT\r\n");
+		Current_Sense_Period = 1000;
+		LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
+		SchedulerTaskEnable(2, 1);
+		break;
+
+	case FSP_CMD_GET_IMPEDANCE:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_GET_IMPEDANCE\r\n");
+		Current_Sense_Period	= pu_GPC_FSP_Payload->get_impedance.Period * 1000;
+		is_h_bridge_enable 		= false;
+		is_Measure_Impedance 	= true;
+
+		V_Switch_Set_Mode(V_SWITCH_MODE_HV_ON);
+		H_Bridge_Set_Mode(&H_Bridge_2, H_BRIDGE_MODE_LS_ON);
+		H_Bridge_Set_Mode(&H_Bridge_1, H_BRIDGE_MODE_HS_ON);
+
+		LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
+
+		SchedulerTaskEnable(2, 1);
+		break;
+
+	case FSP_CMD_HANDSHAKE:
+		UART_Send_String(&RS232_UART, "Received FSP_CMD_HANDSHAKE\r\n");
+		pu_GPP_FSP_Payload->handshake.Cmd 	= FSP_CMD_HANDSHAKE;
+		pu_GPP_FSP_Payload->handshake.Check = 0xAB;
+		
+		fsp_print(2);
+		break;
+	case FSP_CMD_GET_BMP390:
+		UART_Send_String(&RS232_UART, "Received BMP_390 command\r\n");
+		pu_GPP_FSP_Payload->getBMP390.Cmd = FSP_CMD_GET_BMP390	;
+		float temp = (float)compensated_temperature;
+		uint32_t press= (uint32_t)compensated_pressure;
+
+		convertTemperature(temp, pu_GPP_FSP_Payload->getBMP390.temp);
+
+		sprintf(pu_GPP_FSP_Payload->getBMP390.pressure, "%d", press);
+
+		fsp_print(12);
+		break;
+	case FSP_CMD_GET_LMSDOX:
+		UART_Send_String(&RS232_UART, "Received GET_LSMDOX command\r\n");
+		pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LMSDOX;
+
+		convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
+		convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
+		convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
+
+		convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
+		convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
+		convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
+
+		fsp_print(25);
+		break;
 	default:
-
 		break;
-
 	}
+}
+
+static void fsp_print(uint8_t packet_length)
+{
+	s_GPP_FSP_Packet.sod 		= FSP_PKT_SOD;
+	s_GPP_FSP_Packet.src_adr 	= fsp_my_adr;
+	s_GPP_FSP_Packet.dst_adr 	= FSP_ADR_GPC;
+	s_GPP_FSP_Packet.length 	= packet_length;
+	s_GPP_FSP_Packet.type 		= FSP_PKT_TYPE_CMD_W_DATA;
+	s_GPP_FSP_Packet.eof 		= FSP_PKT_EOF;
+	s_GPP_FSP_Packet.crc16 		= crc16_CCITT(FSP_CRC16_INITIAL_VALUE, &s_GPP_FSP_Packet.src_adr, s_GPP_FSP_Packet.length + 4);
+
+	uint8_t encoded_frame[100] = { 0 };
+	uint8_t frame_len;
+	fsp_encode(&s_GPP_FSP_Packet, encoded_frame, &frame_len);
+
+	UART_FSP(&GPC_UART, encoded_frame, frame_len);
 }
 
 void convertTemperature(float temp, uint8_t buf[]) {

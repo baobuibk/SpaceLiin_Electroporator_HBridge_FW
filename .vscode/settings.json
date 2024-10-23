@@ -23,6 +23,7 @@
         "impedance_task.h": "c",
         "pwm_inline.h": "c",
         "v_switch_driver.h": "c",
-        "crc.h": "c"
+        "crc.h": "c",
+        "stdlib.h": "c"
     }
 }
