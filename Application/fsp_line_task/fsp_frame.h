@@ -222,7 +222,7 @@ typedef union _GPC_FSP_Payload_ {
 
 typedef union _GPP_FSP_Payload_ {
 	COMMON_RESPONSE_FRAME					commonFrame;
-		FSP_PULSE_COUNT						send_pulse_count;
+	FSP_PULSE_COUNT							send_pulse_count;
 	FSP_PULSE_DELAY							send_pulse_delay;
 	FSP_PULSE_HV							send_pulse_HV;
 	FSP_PULSE_LV							send_pulse_LV;

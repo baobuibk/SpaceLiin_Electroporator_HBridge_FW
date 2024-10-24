@@ -87,7 +87,7 @@ void Current_Sense_Task(void*)
         Current_Sense_Count     = 0;
         Current_Sense_Period    = 1000;
         
-        SchedulerTaskDisable(2);
+        SchedulerTaskDisable(3);
     }
 }
 

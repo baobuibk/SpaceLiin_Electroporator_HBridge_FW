@@ -350,7 +350,7 @@ void FSP_Line_Process()
 
 		LL_ADC_REG_StartConversion(ADC_I_SENSE_HANDLE);
 
-		SchedulerTaskEnable(2, 1);
+		SchedulerTaskEnable(3, 1);
 		break;
 
 	case FSP_CMD_HANDSHAKE:
