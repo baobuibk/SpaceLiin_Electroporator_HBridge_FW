@@ -5,8 +5,8 @@
  *      Author: Administrator
  */
 
-#ifndef BMP390_BMP390_H_
-#define BMP390_BMP390_H_
+#ifndef I2C_SENSOR_I2C_SENSOR_H_
+#define I2C_SENSOR_I2C_SENSOR_H_
 #include "main.h"
 typedef struct _uncompensated_data_ {
 
@@ -61,7 +61,7 @@ typedef struct _Accel_Gyro_DataTypedef_
 	int y;
 	int z;
 } Accel_Gyro_DataTypedef;
-void BMP390_init();
-void BMP390_Task(void*) ;
+void i2c_sensor_init();
+void i2c_sensor_task(void*) ;
 
-#endif /* BMP390_BMP390_H_ */
+#endif /* I2C_SENSOR_I2C_SENSOR_H_ */

@@ -4,7 +4,7 @@
  *  Created on: Oct 3, 2024
  *      Author: Administrator
  */
-#include "BMP390.h"
+#include <I2C_SENSOR/i2c_sensor.h>
 #include <string.h>
 #include <math.h>
 #define atmPress 101325
@@ -36,18 +36,19 @@ static uint8_t read_uncompensated_value(uint32_t *pressure, uint32_t *temperatur
 	return status;
 }
 
-void BMP390_init()
+void i2c_sensor_init()
 {
 	memset(&BMP_data, 0, sizeof(data));
-	buffer[0] = 11;
+	buffer[0] |= (1<<0);   //x2 oversampling for temperature
+	buffer[0] |= (1<<3) | (1<<4);   //x8 oversampling for pressure
 	HAL_I2C_Mem_Write(&hi2c2, 0xEE, 0x1C, 1, buffer , 1 , 100);  //set oversampling
 	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x1C, 1, buffer , 1 , 100);
 
-	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x1F, 1, buffer , 1 , 100);  //set filter
+	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x1F, 1, buffer , 1 , 100);  //set IIR filter coefficient bit 3..1
 	buffer[0] |= (1<<3);
 	buffer[0] |= (1<<2);
-	buffer[0] |= (1<<1);
-	HAL_I2C_Mem_Write(&hi2c2, 0xEE, 0x1F, 1, buffer , 1 , 100);
+
+	HAL_I2C_Mem_Write(&hi2c2, 0xEE, 0x1F, 1, buffer , 1 , 100); //110 set coef_63
 	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x1F, 1, buffer , 1 , 100);
 
 	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x31, 1, buffer , 21 , 100);    // read data
@@ -115,12 +116,14 @@ void BMP390_init()
 	temp_var = 36893488147419103232.0f;
 
 	BMP_data.compensatedData.PAR_P11 = ((double)(BMP_data.uncompensatedData.NVM_PAR_P11)/temp_var);
-
+	/*****************************************************************/
 	//init LMD6 (0xD4 address)
 	HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x0f, 1, buffer1 , 1 , 100);
-	buffer1[0] = 0x58;
+	buffer1[0] = 0x58;   //setting ODR selection and accel full scale selection
+	//208Hz , +/-4G scale
 	HAL_I2C_Mem_Write(&hi2c2, 0xD4, 0x10, 1, buffer1 , 1 , 100);
-
+	//setting ODR selection and gyro full scale selection
+	//208Hz 500dps
 	buffer1[0] = 0x54;
 	HAL_I2C_Mem_Write(&hi2c2, 0xD4, 0x11, 1, buffer1 , 1 , 100);
 }
@@ -171,19 +174,19 @@ static float BMP390_GetAlt ()
 	return 44330*(1-(pow(((float)compensated_pressure/(float)atmPress), 0.19029495718)));
 }
 
-void BMP390_Task(void *)
+void i2c_sensor_task(void *)
 {
-	//1. write 0x33 to register 0x1B
+	//1. write 0x13 to register 0x1B
 	//2. if bit 5,6, of status register
 	//3. compensate the value
 	//1
 	buffer[0] = 0x13;
-	HAL_I2C_Mem_Write(&hi2c2, 0xEE, 0x1B, 1, buffer , 1 , 100);
+	HAL_I2C_Mem_Write(&hi2c2, 0xEE, 0x1B, 1, buffer , 1 , 100); //pressure ON, temperature ON, force mode
 	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x1B, 1, buffer , 1 , 100);
 	//2
 
-	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x03, 1, buffer , 1 , 100);
-	if (buffer[0] & (1<<6))
+	HAL_I2C_Mem_Read(&hi2c2, 0xEE, 0x03, 1, buffer , 1 , 100);  //read status register
+	if (buffer[0] & (1<<6))  //if new value available
 	{
 		read_uncompensated_value(&raw_pressure, &raw_temperature);
 		BMP309_temperature_compensate(raw_temperature, &BMP_data);
@@ -191,7 +194,7 @@ void BMP390_Task(void *)
 		altitudeValue= BMP390_GetAlt();
 	}
 	//2
-	HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x1E, 1, buffer1 , 1 , 100);
+	HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x1E, 1, buffer1 , 1 , 100); //read status register
 	if ((buffer1[0] & (1<<0)) &&( buffer1[0] & (1<<1))) //if new data available
 	{       
 		HAL_I2C_Mem_Read(&hi2c2, 0xD4, 0x22, 1, buffer1 , 12 , 100);

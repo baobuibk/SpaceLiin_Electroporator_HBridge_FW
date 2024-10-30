@@ -4,7 +4,7 @@
 
 static void Status_Led(void*);
 
-#define         SCHEDULER_TASK_COUNT  6
+#define         SCHEDULER_TASK_COUNT  7
 uint32_t 		g_ui32SchedulerNumTasks = SCHEDULER_TASK_COUNT;
 tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                 {
@@ -45,12 +45,19 @@ tSchedulerTask 	g_psSchedulerTable[SCHEDULER_TASK_COUNT] =
                             true                        //is active
                     },
 					{
-                            &BMP390_Task,
+                            &i2c_sensor_task,
                             (void *) 0,
                             10000,                      //call every 1ms
                             0,                          //count from start
                             true                        //is active
                     },
+					{
+					                            &send_i2c_sensor_data_task,
+					                            (void *) 0,
+					                            10000,                      //call every 1ms
+					                            0,                          //count from start
+					                            false                        //is active
+					                    },
                 };
 
 void App_Main(void)
@@ -64,7 +71,7 @@ void App_Main(void)
     V_Switch_Driver_Init();
     FSP_Line_Task_Init();
     CMD_Line_Task_Init();
-    BMP390_init();
+    i2c_sensor_init();
 
     while (1)
     {

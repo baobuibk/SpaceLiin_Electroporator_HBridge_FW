@@ -45,7 +45,8 @@
 #define FSP_CMD_SENT_CURRENT			0x1F
 #define FSP_CMD_SENT_IMPEDANCE			0x20
 #define FSP_CMD_GET_BMP390				0x21
-#define FSP_CMD_GET_LMSDOX				0x22
+#define FSP_CMD_GET_I2C_SENSOR			0x22
+#define FSP_CMD_STOP_GET_SENSOR			0x23
 typedef struct _COMMON_FRAME_
 {
 	uint8_t Cmd;
@@ -190,8 +191,10 @@ typedef struct _GET_BMP390_ {
 	uint8_t temp[5];
 	uint8_t pressure[6];
 } GET_BMP390;
-typedef struct _GET_LSMDOX_ {
+typedef struct _GET_I2C_SENSOR_ {
 	uint8_t Cmd;
+	uint8_t temp[5];
+	uint8_t pressure[7];
 	uint8_t accel_x[4];
 	uint8_t accel_y[4];
 	uint8_t accel_z[4];
@@ -199,7 +202,7 @@ typedef struct _GET_LSMDOX_ {
 	uint8_t gyro_y[4];
 	uint8_t gyro_z[4];
 
-} GET_LSMDOX;
+} GET_I2C_SENSOR;
 
 // Union to encapsulate all frame types
 typedef union _GPC_FSP_Payload_ {
@@ -237,7 +240,7 @@ typedef union _GPP_FSP_Payload_ {
 	GET_CURRENT_FRAME						get_current;
 	GET_IMPEDANCE_FRAME						get_impedance;
 	GET_BMP390								getBMP390;
-	GET_LSMDOX								getLSMDOX;
+	GET_I2C_SENSOR							GET_I2C_SENSOR;
 } GPP_FSP_Payload;
 
 

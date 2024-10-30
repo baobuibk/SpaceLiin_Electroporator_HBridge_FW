@@ -18,6 +18,7 @@ struct _fsp_line_typedef {
 extern Accel_Gyro_DataTypedef _gyro, _accel;
 void convertTemperature(float temp, uint8_t buf[]);
 void convertIntegerToBytes(int number, uint8_t arr[]);
+
 typedef struct _fsp_line_typedef fsp_line_typedef;
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Private Variables ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 //static const char * ErrorCode[7] =
@@ -370,21 +371,28 @@ void FSP_Line_Process()
 
 		sprintf(pu_GPP_FSP_Payload->getBMP390.pressure, "%d", press);
 
+
 		fsp_print(12);
 		break;
-	case FSP_CMD_GET_LMSDOX:
-		UART_Send_String(&RS232_UART, "Received GET_LSMDOX command\r\n");
-		pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LMSDOX;
+	case FSP_CMD_GET_I2C_SENSOR:
+		UART_Send_String(&RS232_UART, "Received GET_I2C_SENSOR command\r\n");
+//		pu_GPP_FSP_Payload->getLSMDOX.Cmd = FSP_CMD_GET_LMSDOX;
+//
+//		convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
+//		convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
+//		convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
+//
+//		convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
+//		convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
+//		convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
+//
+//		fsp_print(25);
+		SchedulerTaskEnable(6, 1);
+		send_i2c_sensor_data_task(NULL);
+		break;
+	case FSP_CMD_STOP_GET_SENSOR:
 
-		convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->getLSMDOX.accel_x);
-		convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->getLSMDOX.accel_y);
-		convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->getLSMDOX.accel_z);
-
-		convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->getLSMDOX.gyro_x);
-		convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->getLSMDOX.gyro_y);
-		convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->getLSMDOX.gyro_z);
-
-		fsp_print(25);
+		SchedulerTaskDisable(6);
 		break;
 	default:
 		break;
@@ -421,5 +429,24 @@ void convertIntegerToBytes(int number, uint8_t arr[]) {
 	arr[2] = (number >>16) & 0xff;
 	arr[3] = (number >>24) & 0xff;
 
+}
+void send_i2c_sensor_data_task(void *) {
+			pu_GPP_FSP_Payload->GET_I2C_SENSOR.Cmd = FSP_CMD_GET_I2C_SENSOR;
+			float temp = (float)compensated_temperature;
+			uint32_t press= (uint32_t)compensated_pressure;
+
+			convertTemperature(temp, pu_GPP_FSP_Payload->GET_I2C_SENSOR.temp);
+			pu_GPP_FSP_Payload->GET_I2C_SENSOR.temp[4] = '\0';
+
+			sprintf(pu_GPP_FSP_Payload->GET_I2C_SENSOR.pressure, "%d", press);
+			convertIntegerToBytes(_accel.x, pu_GPP_FSP_Payload->GET_I2C_SENSOR.accel_x);
+			convertIntegerToBytes(_accel.y, pu_GPP_FSP_Payload->GET_I2C_SENSOR.accel_y);
+			convertIntegerToBytes(_accel.z, pu_GPP_FSP_Payload->GET_I2C_SENSOR.accel_z);
+
+			convertIntegerToBytes(_gyro.x, pu_GPP_FSP_Payload->GET_I2C_SENSOR.gyro_x);
+			convertIntegerToBytes(_gyro.y, pu_GPP_FSP_Payload->GET_I2C_SENSOR.gyro_y);
+			convertIntegerToBytes(_gyro.z, pu_GPP_FSP_Payload->GET_I2C_SENSOR.gyro_z);
+
+			fsp_print(36);
 }
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */

@@ -41,6 +41,7 @@ void FSP_Line_Task(void);
 void GPC_UART_IRQHandler(void);
 
 void FSP_Line_Process();
+void send_i2c_sensor_data_task(void *);
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ End of the program ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #endif /* FSP_LINE_TASK_H_ */

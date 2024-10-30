@@ -1,6 +1,7 @@
 #ifndef APP_H_
 #define APP_H_
 
+#include <I2C_SENSOR/i2c_sensor.h>
 #include <stdbool.h>
 
 #include "stm32f030xc.h"
@@ -18,9 +19,6 @@
 #include "cmd_line_task.h"
 #include "fsp_line_task.h"
 #include "impedance_task.h"
-#include "BMP390.h"
-
-// INCLUDE DRIVER //
 #include "h_bridge_driver.h"
 #include "v_switch_driver.h"
 
